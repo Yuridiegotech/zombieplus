@@ -11,65 +11,43 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.zombieplus.factory.BrowserFactory;
+import pages.LandingPage;
 
 public class LeadsFrontTest {
   private BrowserContext context;
   private Page page;
+  private LandingPage landingPage;
 
   @BeforeEach
   void setUp() {
-    BrowserFactory.headless = false; // exemplo: rodar com interface
+    BrowserFactory.headless = false;
     context = BrowserFactory.createContext();
     page = context.newPage();
-    // Inicia o trace
+    landingPage = new LandingPage(page);
     context.tracing().start(new com.microsoft.playwright.Tracing.StartOptions().setScreenshots(true).setSnapshots(true).setSources(true));
   }
 
   @Test
   @DisplayName("Deve cadastrar um lead na fila de espera")
   void fluxoPrincipal() {
-    page.navigate("http://localhost:3000");
-    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Aperte o play")).click();
-    page.getByTestId("modal")
-        .getByRole(AriaRole.HEADING)
-        .filter(new Locator.FilterOptions().setHasText("Fila de espera"))
-        .waitFor();
-    page.getByPlaceholder("Seu nome completo").fill("Diego Yuri1");
-    page.getByPlaceholder("Seu email principal").fill("yuridiegotech1@gmail.com");
-    page.waitForTimeout(1000); // espera 1 segundo
-    page.getByTestId("modal")
-        .getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Quero entrar na fila!"))
-        .click();
-
+    landingPage.navigate();
+    landingPage.openLeadModal();
+    landingPage.fillName("Diego Yuri1");
+    landingPage.fillEmail("yuridiegotech1@gmail.com");
+    landingPage.submitLeadForm();
     String message  = "Agradecemos por compartilhar seus dados conosco. Em breve, nossa equipe entrará em contato!";
-    page.locator(".toast")
-        .getByText(message)
-        .waitFor(new Locator.WaitForOptions()
-        .setState(WaitForSelectorState.HIDDEN)
-        .setTimeout(5000)
-    );
-
+    landingPage.waitForToastMessageHidden(message);
   }
 
   @Test
   @DisplayName("Deve retornar erro ao cadastrar email invalido")
   void fluxoPrincipalEmailIncorreto() {
-    page.navigate("http://localhost:3000");
-    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Aperte o play")).click();
-    page.getByTestId("modal")
-        .getByRole(AriaRole.HEADING)
-        .filter(new Locator.FilterOptions().setHasText("Fila de espera"))
-        .waitFor();
-    page.getByPlaceholder("Seu nome completo").fill("Diego Yuri1");
-    page.getByPlaceholder("Seu email principal").fill("yuridiegotech.gmail.com");
-    page.waitForTimeout(1000); // espera 1 segundo
-    page.getByTestId("modal")
-        .getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Quero entrar na fila!"))
-        .click();
-
-    Locator alertaEmail = page.locator("input[name='email'] + .alert");
-    alertaEmail.waitFor();
-    assert (alertaEmail.textContent().equals("Email incorreto"));
+    landingPage.navigate();
+    landingPage.openLeadModal();
+    landingPage.fillName("Diego Yuri1");
+    landingPage.fillEmail("yuridiegotech1.gmail.com");
+    landingPage.submitLeadForm();
+    landingPage.assertAlertsTexts("Email incorreto");
 
 
 
@@ -78,68 +56,32 @@ public class LeadsFrontTest {
   @Test
   @DisplayName("Deve retornar erro ao cadastrar sem enviar um nome")
   void campoObrigatorioNome() {
-    page.navigate("http://localhost:3000");
-    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Aperte o play")).click();
-    page.getByTestId("modal")
-        .getByRole(AriaRole.HEADING)
-        .filter(new Locator.FilterOptions().setHasText("Fila de espera"))
-        .waitFor();
-    page.getByPlaceholder("Seu email principal").fill("yuridiegotech.gmail.com");
-    page.waitForTimeout(1000); // espera 1 segundo
-    page.getByTestId("modal")
-        .getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Quero entrar na fila!"))
-        .click();
-
-    Locator alertaNome = page.locator("input[name='name'] + .alert");
-    alertaNome.waitFor();
-    assert (alertaNome.textContent().contains("Campo obrigatório"));
+    landingPage.navigate();
+    landingPage.openLeadModal();
+    landingPage.fillEmail("yuridiegotech1@gmail.com");
+    landingPage.submitLeadForm();
+    landingPage.assertAlertsTexts("Campo obrigatório");
 
   }
 
   @Test
   @DisplayName("Deve retornar erro ao cadastrar sem enviar um Email")
   void campoObrigatorioEmail() {
-    page.navigate("http://localhost:3000");
-    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Aperte o play")).click();
-    page.getByTestId("modal")
-        .getByRole(AriaRole.HEADING)
-        .filter(new Locator.FilterOptions().setHasText("Fila de espera"))
-        .waitFor();
-
-    page.getByPlaceholder("Seu nome completo").fill("Diego Yuri1");
-    page.waitForTimeout(1000); // espera 1 segundo
-    page.getByTestId("modal")
-        .getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Quero entrar na fila!"))
-        .click();
-
-    Locator alertaEmail = page.locator("input[name='email'] + .alert");
-    alertaEmail.waitFor();
-    assert (alertaEmail.textContent().contains("Campo obrigatório"));
+    landingPage.navigate();
+    landingPage.openLeadModal();
+    landingPage.fillName("Diego Yuri1");
+    landingPage.submitLeadForm();
+    landingPage.assertAlertsTexts("Campo obrigatório");
 
   }
 
   @Test
   @DisplayName("Deve retornar erro ao cadastrar sem enviar nenhum dado")
   void campoObrigatorio() {
-    page.navigate("http://localhost:3000");
-    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Aperte o play")).click();
-    page.getByTestId("modal")
-        .getByRole(AriaRole.HEADING)
-        .filter(new Locator.FilterOptions().setHasText("Fila de espera"))
-        .waitFor();
-
-    page.waitForTimeout(1000); // espera 1 segundo
-    page.getByTestId("modal")
-        .getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Quero entrar na fila!"))
-        .click();
-
-    Locator alertaNome = page.locator("input[name='name'] + .alert");
-    alertaNome.waitFor();
-    assert (alertaNome.textContent().contains("Campo obrigatório"));
-
-    Locator alertaEmail = page.locator("input[name='email'] + .alert");
-    alertaEmail.waitFor();
-    assert (alertaEmail.textContent().contains("Campo obrigatório"));
+    landingPage.navigate();
+    landingPage.openLeadModal();
+    landingPage.submitLeadForm();
+    landingPage.assertAlertsTexts("Campo obrigatório", "Campo obrigatório");
 
   }
 
