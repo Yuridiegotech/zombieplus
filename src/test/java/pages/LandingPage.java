@@ -40,13 +40,6 @@ public class LandingPage {
     }
 
 
-    public void waitForToastMessageHidden(String message) {
-        page.locator(".toast").getByText(message)
-            .waitFor(new Locator.WaitForOptions()
-                .setState(WaitForSelectorState.HIDDEN)
-                .setTimeout(5000)
-            );
-    }
 
     public void assertAlertsTexts(String... expectedTexts) {
         Locator alerts = page.locator(".alert");
