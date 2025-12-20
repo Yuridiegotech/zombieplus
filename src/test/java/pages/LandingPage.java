@@ -16,10 +16,6 @@ public class LandingPage {
         page.navigate("http://localhost:3000");
     }
 
-  public void navigate(String url) {
-    page.navigate("http://localhost:3000" + "/" + url);
-  }
-
     public void openLeadModal() {
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Aperte o play")).click();
         page.getByTestId("modal")
