@@ -16,6 +16,10 @@ public class LandingPage {
         page.navigate("http://localhost:3000");
     }
 
+  public void navigate(String url) {
+    page.navigate("http://localhost:3000" + "/" + url);
+  }
+
     public void openLeadModal() {
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Aperte o play")).click();
         page.getByTestId("modal")
@@ -40,13 +44,6 @@ public class LandingPage {
     }
 
 
-    public void waitForToastMessageHidden(String message) {
-        page.locator(".toast").getByText(message)
-            .waitFor(new Locator.WaitForOptions()
-                .setState(WaitForSelectorState.HIDDEN)
-                .setTimeout(5000)
-            );
-    }
 
     public void assertAlertsTexts(String... expectedTexts) {
         Locator alerts = page.locator(".alert");
