@@ -1,8 +1,10 @@
 package tests.e2e;
 
+import com.github.javafaker.Faker;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ public class LeadsFrontTest {
   private Page page;
   private LandingPage landingPage;
   private Components components;
+  private Faker faker;
 
   @BeforeEach
   void setUp() {
@@ -23,20 +26,50 @@ public class LeadsFrontTest {
     page = context.newPage();
     landingPage = new LandingPage(page);
     components = new Components(page);
+    faker = new Faker();
 
     context.tracing().start(new com.microsoft.playwright.Tracing.StartOptions().setScreenshots(true).setSnapshots(true).setSources(true));
   }
 
+
   @Test
   @DisplayName("Deve cadastrar um lead na fila de espera")
   void fluxoPrincipal() {
+    String leadName = faker.name().fullName();
+    String leadEmail = faker.internet().emailAddress();
+
     landingPage.navigate();
     landingPage.openLeadModal();
-    landingPage.fillName("Diego Yuri1");
-    landingPage.fillEmail("yuridiegotech1@gmail.com");
+    landingPage.fillName(leadName);
+    landingPage.fillEmail(leadEmail);
     landingPage.submitLeadForm();
     String message  = "Agradecemos por compartilhar seus dados conosco. Em breve, nossa equipe entrará em contato!";
     components.waitForToastMessageHidden(message);
+  }
+
+  @Test
+  @DisplayName("Não deve cadastrar quando um email já existe")
+  void FluxoPrincipalNaoCadastroEmailExistente() {
+
+    String leadName = faker.name().fullName();
+    String leadEmail = faker.internet().emailAddress();
+
+    landingPage.navigate();
+    landingPage.openLeadModal();
+    landingPage.fillName(leadName);
+    landingPage.fillEmail(leadEmail);
+    landingPage.submitLeadForm();
+    String message  = "Agradecemos por compartilhar seus dados conosco. Em breve, nossa equipe entrará em contato!";
+    components.waitForToastMessageHidden(message);
+
+    landingPage.openLeadModal();
+    landingPage.fillName(leadName);
+    landingPage.fillEmail(leadEmail);
+    landingPage.submitLeadForm();
+    String message2  = "O endereço de e-mail fornecido já está registrado em nossa fila de espera.";
+    components.waitForToastMessageHidden(message2);
+
+
   }
 
   @Test
