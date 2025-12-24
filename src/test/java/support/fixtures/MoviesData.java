@@ -1,4 +1,4 @@
-package fixtures;
+package support.fixtures;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -16,7 +16,7 @@ public class MoviesData {
 
     private static void loadMovies() {
         if (moviesData == null) {
-            try (BufferedReader reader = new BufferedReader(new FileReader("src/test/java/fixtures/movies.json"))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader("src/test/java/support/fixtures/movies.json"))) {
                 Gson gson = new Gson();
                 Type type = new TypeToken<Map<String, Map<String, Object>>>(){}.getType();
                 moviesData = gson.fromJson(reader, type);

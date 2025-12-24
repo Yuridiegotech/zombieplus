@@ -1,46 +1,27 @@
 package tests.e2e;
 
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.Page;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.zombieplus.factory.BrowserFactory;
-import pages.Components;
-import pages.LoginPage;
-import pages.MoviesPage;
-import fixtures.MoviesData;
+import support.BaseTest;
+import support.database;
+import support.fixtures.MoviesData;
 
-public class MoviesTests {
-
-  private BrowserContext context;
-  private Page page;
-  private MoviesPage moviesPage;
-  private LoginPage loginPage;
-  private Components components;
-
-
-  @BeforeEach
-  void setUp() {
-    BrowserFactory.headless = false;
-    context = BrowserFactory.createContext();
-    page = context.newPage();
-    moviesPage = new MoviesPage(page);
-    loginPage = new LoginPage(page);
-    components = new Components(page);
-    context.tracing().start(new com.microsoft.playwright.Tracing.StartOptions().setScreenshots(true).setSnapshots(true).setSources(true));
-  }
+public class MoviesTests extends BaseTest {
 
   @Test
   @DisplayName("Deve poder cadastrar um novo Filme")
   void pageMoviesNewRecord() {
     var movie = MoviesData.get("create");
 
+    // Deleta o filme do banco de dados caso já exista
+    String movieTitle = MoviesData.getStringValue(movie, "title");
+    database.executeSQL(String.format("DELETE FROM movies WHERE title = '" + movieTitle + "'"));
+
     //devo estar logado
     loginPage.navigate();
     loginPage.submit("admin@zombieplus.com", "pwd123");
     moviesPage.isLoggedIn();
+
 
     //cadastrar novo filme
     moviesPage.createNewMovie(
@@ -53,12 +34,5 @@ public class MoviesTests {
     page.waitForTimeout(5000);
   }
 
-
-  @AfterEach
-  void tearDown() {
-    // Salva o trace
-    context.tracing().stop(new com.microsoft.playwright.Tracing.StopOptions().setPath(java.nio.file.Paths.get("trace-MoviesPage.zip")));
-    context.close();
-  }
 
 }

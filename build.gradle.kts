@@ -15,6 +15,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("com.github.javafaker:javafaker:1.0.2")
     testImplementation("com.google.code.gson:gson:2.11.0")
+    testImplementation("org.postgresql:postgresql:42.7.1")
 }
 
 tasks.test {

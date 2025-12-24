@@ -1,36 +1,11 @@
 package tests.e2e;
 
-import com.github.javafaker.Faker;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.Page;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.microsoft.playwright.options.RequestOptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.microsoft.playwright.options.RequestOptions;
-import org.zombieplus.factory.BrowserFactory;
-import pages.Components;
-import pages.LandingPage;
+import support.BaseTest;
 
-public class LeadsTest {
-  private BrowserContext context;
-  private Page page;
-  private LandingPage landingPage;
-  private Components components;
-  private Faker faker;
-
-  @BeforeEach
-  void setUp() {
-    BrowserFactory.headless = false;
-    context = BrowserFactory.createContext();
-    page = context.newPage();
-    landingPage = new LandingPage(page);
-    components = new Components(page);
-    faker = new Faker();
-
-    context.tracing().start(new com.microsoft.playwright.Tracing.StartOptions().setScreenshots(true).setSnapshots(true).setSources(true));
-  }
-
+public class LeadsTest extends BaseTest {
 
   @Test
   @DisplayName("Deve cadastrar um lead na fila de espera")
@@ -68,8 +43,6 @@ public class LeadsTest {
     landingPage.submitLeadForm();
     String message2  = "O endereço de e-mail fornecido já está registrado em nossa fila de espera.";
     components.waitForToastMessageHidden(message2);
-
-
   }
 
   @Test
@@ -81,9 +54,6 @@ public class LeadsTest {
     landingPage.fillEmail("yuridiegotech1.gmail.com");
     landingPage.submitLeadForm();
     landingPage.assertAlertsTexts("Email incorreto");
-
-
-
   }
 
   @Test
@@ -94,7 +64,6 @@ public class LeadsTest {
     landingPage.fillEmail("yuridiegotech1@gmail.com");
     landingPage.submitLeadForm();
     landingPage.assertAlertsTexts("Campo obrigatório");
-
   }
 
   @Test
@@ -105,7 +74,6 @@ public class LeadsTest {
     landingPage.fillName("Diego Yuri1");
     landingPage.submitLeadForm();
     landingPage.assertAlertsTexts("Campo obrigatório");
-
   }
 
   @Test
@@ -115,14 +83,6 @@ public class LeadsTest {
     landingPage.openLeadModal();
     landingPage.submitLeadForm();
     landingPage.assertAlertsTexts("Campo obrigatório", "Campo obrigatório");
-
   }
 
-
-  @AfterEach
-  void tearDown() {
-    // Salva o trace
-    context.tracing().stop(new com.microsoft.playwright.Tracing.StopOptions().setPath(java.nio.file.Paths.get("trace-leadsfront.zip")));
-    context.close();
-  }
 }
