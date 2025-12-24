@@ -12,7 +12,7 @@ import org.zombieplus.factory.BrowserFactory;
 import pages.Components;
 import pages.LandingPage;
 
-public class LeadsFrontTest {
+public class LeadsTest {
   private BrowserContext context;
   private Page page;
   private LandingPage landingPage;

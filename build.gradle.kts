@@ -14,6 +14,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("com.github.javafaker:javafaker:1.0.2")
+    testImplementation("com.google.code.gson:gson:2.11.0")
 }
 
 tasks.test {

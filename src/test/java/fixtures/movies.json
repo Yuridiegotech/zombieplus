@@ -1,0 +1,98 @@
+{
+  "create": {
+    "title": "Guerra Mundial Z",
+    "overview": "Um ex-investigador da ONU percorre diferentes países em busca da origem de uma epidemia global que transforma pessoas em criaturas extremamente agressivas, na tentativa de evitar o colapso da humanidade.",
+    "company": "Paramount Pictures",
+    "release_year": 2013,
+    "featured": true,
+    "cover": "covers/guerra-mundial-z.jpg"
+  },
+  "A Noite dos Mortos-Vivos": {
+    "title": "A Noite dos Mortos-Vivos",
+    "overview": "Um grupo de sobreviventes se refugia em uma casa abandonada enquanto hordas de mortos-vivos cercam o local. O filme que definiu o gênero zumbi moderno.",
+    "company": "Image Ten",
+    "release_year": 1968,
+    "featured": false,
+    "cover": "covers/noite-dos-mortos-vivos.jpg"
+  },
+  "Zumbilândia": {
+    "title": "Zumbilândia",
+    "overview": "Em um mundo pós-apocalíptico dominado por zumbis, um grupo improvável de sobreviventes segue um conjunto de regras peculiares para permanecer vivo enquanto viaja pelos Estados Unidos.",
+    "company": "Columbia Pictures",
+    "release_year": 2009,
+    "featured": true,
+    "cover": "covers/zumbilandia.jpg"
+  },
+  "Resident Evil: O Hóspede Maldito": {
+    "title": "Resident Evil: O Hóspede Maldito",
+    "overview": "Uma força especial enfrenta uma inteligência artificial mortal e centenas de cientistas transformados em zumbis após um acidente em um laboratório subterrâneo da Corporação Umbrella.",
+    "company": "Screen Gems",
+    "release_year": 2002,
+    "featured": false,
+    "cover": "covers/resident-evil.jpg"
+  },
+  "Extermínio": {
+    "title": "Extermínio",
+    "overview": "Ativistas libertam macacos infectados com um vírus da raiva em um laboratório, desencadeando uma epidemia apocalíptica que transforma as pessoas em criaturas violentas e sedentas por sangue.",
+    "company": "Fox Searchlight Pictures",
+    "release_year": 2002,
+    "featured": false,
+    "cover": "covers/exterminio.jpg"
+  },
+  "Madrugada dos Mortos": {
+    "title": "Madrugada dos Mortos",
+    "overview": "Sobreviventes de um apocalipse zumbi se refugiam em um shopping center, mas logo descobrem que a segurança é temporária enquanto as hordas crescem do lado de fora.",
+    "company": "Strike Entertainment",
+    "release_year": 2004,
+    "featured": false,
+    "cover": "covers/madrugada-dos-mortos.jpg"
+  },
+  "Invasão Zumbi": {
+    "title": "Invasão Zumbi",
+    "overview": "Dois vendedores de videogame precisam sobreviver a um apocalipse zumbi enquanto tentam salvar seus colegas de trabalho presos em uma loja.",
+    "company": "Rogue Pictures",
+    "release_year": 2008,
+    "featured": false,
+    "cover": "covers/invasao-zumbi.jpg"
+  },
+  "Extermínio 2": {
+    "title": "Extermínio 2",
+    "overview": "Seis meses após o vírus da raiva devastar a Inglaterra, as forças militares americanas declaram a ameaça contida. Mas quando o vírus ressurge, o terror recomeça.",
+    "company": "Fox Atomic",
+    "release_year": 2007,
+    "featured": false,
+    "cover": "covers/exterminio-2.jpg"
+  },
+  "Rec": {
+    "title": "Rec",
+    "overview": "Uma repórter e seu cinegrafista ficam presos em um prédio em quarentena onde os moradores estão sendo infectados por um misterioso vírus que os transforma em criaturas assassinas.",
+    "company": "Filmax",
+    "release_year": 2007,
+    "featured": false,
+    "cover": "covers/rec.jpg"
+  },
+  "Terra dos Mortos": {
+    "title": "Terra dos Mortos",
+    "overview": "Em um mundo dominado por mortos-vivos, os sobreviventes vivem em uma cidade fortificada onde as classes sociais são divididas, mas os zumbis estão evoluindo e aprendendo.",
+    "company": "Universal Pictures",
+    "release_year": 2005,
+    "featured": false,
+    "cover": "covers/terra-dos-mortos.jpg"
+  },
+  "Busca Mortal": {
+    "title": "Busca Mortal",
+    "overview": "Em meio a um apocalipse zumbi na Coreia, um homem embarca em um trem para Busan com sua filha, mas o trajeto se torna uma luta desesperada pela sobrevivência.",
+    "company": "Next Entertainment World",
+    "release_year": 2016,
+    "featured": true,
+    "cover": "covers/busca-mortal.jpg"
+  },
+  "Zumbilândia: Atire Duas Vezes": {
+    "title": "Zumbilândia: Atire Duas Vezes",
+    "overview": "A equipe de caçadores de zumbis retorna para enfrentar novos tipos de mortos-vivos evoluídos e lidar com outros sobreviventes enquanto lutam para sobreviver.",
+    "company": "Columbia Pictures",
+    "release_year": 2019,
+    "featured": false,
+    "cover": "covers/zumbilandia-2.jpg"
+  }
+}
