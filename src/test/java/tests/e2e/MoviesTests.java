@@ -22,7 +22,6 @@ public class MoviesTests extends BaseTest {
     loginPage.submit("admin@zombieplus.com", "pwd123");
     moviesPage.isLoggedIn();
 
-
     //cadastrar novo filme
     moviesPage.createNewMovie(
         MoviesData.getStringValue(movie, "title"),
@@ -32,6 +31,12 @@ public class MoviesTests extends BaseTest {
     );
     components.waitForToastMessageHidden("Cadastro realizado com sucesso!");
     page.waitForTimeout(5000);
+  }
+
+  @Test
+  @DisplayName("Não deve cadastrar quando os campos obrigatórios não forem preenchidos")
+  void pageMoviesRecordWithFieldNull() {
+
   }
 
 

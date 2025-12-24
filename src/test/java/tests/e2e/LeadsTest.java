@@ -23,6 +23,15 @@ public class LeadsTest extends BaseTest {
   }
 
   @Test
+  @DisplayName("Deve cadastrar um lead na fila de espera")
+  void fluxoPrincipal1() {
+    page.navigate("https://google.com.br");
+    page.waitForTimeout(5000);
+  }
+
+
+
+  @Test
   @DisplayName("Não deve cadastrar quando um email já existe")
   void FluxoPrincipalNaoCadastroEmailExistente() {
     String leadName = faker.name().fullName();
