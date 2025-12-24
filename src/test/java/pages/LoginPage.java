@@ -28,11 +28,7 @@ public class LoginPage {
         .click();
   }
 
-  public void isLoggedIn() {
-    page.waitForLoadState(LoadState.NETWORKIDLE);
-    page.waitForURL("**/admin/**");
 
-  }
 
   public void assertAlertsTexts(String... expectedTexts) {
     Locator alerts = page.locator("span[class$=alert]");

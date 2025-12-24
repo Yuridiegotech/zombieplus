@@ -10,6 +10,7 @@ import org.zombieplus.factory.BrowserFactory;
 import pages.Components;
 import pages.LandingPage;
 import pages.LoginPage;
+import pages.MoviesPage;
 
 public class LoginTest {
 
@@ -17,6 +18,7 @@ public class LoginTest {
   private Page page;
   private LoginPage loginPage;
   private Components components;
+  private MoviesPage moviesPage;
 
 
   @BeforeEach
@@ -26,6 +28,7 @@ public class LoginTest {
     page = context.newPage();
     loginPage = new LoginPage(page);
     components = new Components(page);
+    moviesPage = new MoviesPage(page);
     context.tracing().start(new com.microsoft.playwright.Tracing.StartOptions().setScreenshots(true).setSnapshots(true).setSources(true));
   }
 
@@ -35,7 +38,7 @@ public class LoginTest {
 
     loginPage.navigate();
     loginPage.submit("admin@zombieplus.com", "pwd123");
-    loginPage.isLoggedIn();
+    moviesPage.isLoggedIn();
 
 
 
