@@ -4,10 +4,10 @@ import com.github.javafaker.Faker;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.microsoft.playwright.options.RequestOptions;
 import org.zombieplus.factory.BrowserFactory;
 import pages.Components;
 import pages.LandingPage;
@@ -50,18 +50,18 @@ public class LeadsFrontTest {
   @Test
   @DisplayName("Não deve cadastrar quando um email já existe")
   void FluxoPrincipalNaoCadastroEmailExistente() {
-
     String leadName = faker.name().fullName();
     String leadEmail = faker.internet().emailAddress();
 
+    // Cadastra o lead via API primeiro (massa de teste)
+    var newLead = page.request().post("http://localhost:3333/leads",RequestOptions.create()
+            .setData(java.util.Map.of(
+                "name", leadName,
+                "email", leadEmail
+            )));
+    assert newLead.status() == 201 : "Falha ao cadastrar lead via API";
+    // Tenta cadastrar o mesmo lead via UI
     landingPage.navigate();
-    landingPage.openLeadModal();
-    landingPage.fillName(leadName);
-    landingPage.fillEmail(leadEmail);
-    landingPage.submitLeadForm();
-    String message  = "Agradecemos por compartilhar seus dados conosco. Em breve, nossa equipe entrará em contato!";
-    components.waitForToastMessageHidden(message);
-
     landingPage.openLeadModal();
     landingPage.fillName(leadName);
     landingPage.fillEmail(leadEmail);
