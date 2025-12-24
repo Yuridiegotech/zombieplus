@@ -34,6 +34,17 @@ public class LoginPage {
 
   }
 
+  public void assertAlertsTexts(String... expectedTexts) {
+    Locator alerts = page.locator("span[class$=alert]");
+    int count = alerts.count();
+    assert count == expectedTexts.length : "Quantidade de alertas diferente do esperado";
+    for (int i = 0; i < count; i++) {
+      alerts.nth(i).waitFor(); // Aguarda cada alerta individualmente
+      String actual = alerts.nth(i).textContent();
+      assert actual.contains(expectedTexts[i]) : "Esperado: " + expectedTexts[i] + ", Obtido: " + actual;
+    }
+  }
+
 
 
 

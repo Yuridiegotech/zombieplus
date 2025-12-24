@@ -52,6 +52,46 @@ public class LoginTest {
 
   }
 
+  @Test
+  @DisplayName("Não Deve Logar quando o email é inválido")
+  void PageLoginAdminEmailWithIncorrect() {
+
+    loginPage.navigate();
+    loginPage.submit("yuridiegotech.vercel", "abc123");
+    loginPage.assertAlertsTexts("Email incorreto");
+
+  }
+
+  @Test
+  @DisplayName("Não Deve Logar quando o email nao é preenchido")
+  void PageLoginAdminEmailNull() {
+
+    loginPage.navigate();
+    loginPage.submit("", "errada");
+    loginPage.assertAlertsTexts("Campo obrigatório");
+
+  }
+
+  @Test
+  @DisplayName("Não Deve Logar quando o Senha nao é preenchido")
+  void PageLoginAdminPasswordNull() {
+
+    loginPage.navigate();
+    loginPage.submit("Teste@teste.com", "");
+    loginPage.assertAlertsTexts("Campo obrigatório");
+
+  }
+
+  @Test
+  @DisplayName("Não Deve Logar quando o Senha e Email nao é preenchido")
+  void PageLoginAdminPasswordAndEmailWithNull() {
+
+    loginPage.navigate();
+    loginPage.submit("", "");
+    loginPage.assertAlertsTexts("Campo obrigatório","Campo obrigatório");
+
+  }
+
 
   @AfterEach
   void tearDown() {
