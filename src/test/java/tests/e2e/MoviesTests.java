@@ -18,12 +18,12 @@ public class MoviesTests extends BaseTest {
     database.executeSQL(String.format("DELETE FROM movies WHERE title = '" + movieTitle + "'"));
 
     //devo estar logado
-    loginPage.navigate();
-    loginPage.submit("admin@zombieplus.com", "pwd123");
-    moviesPage.isLoggedIn();
+    login.navigate();
+    login.submit("admin@zombieplus.com", "pwd123");
+    login.isLoggedIn();
 
     //cadastrar novo filme
-    moviesPage.createNewMovie(
+    movies.createNewMovie(
         MoviesData.getStringValue(movie, "title"),
         MoviesData.getStringValue(movie, "overview"),
         MoviesData.getStringValue(movie, "company"),
@@ -37,6 +37,19 @@ public class MoviesTests extends BaseTest {
   @DisplayName("Não deve cadastrar quando os campos obrigatórios não forem preenchidos")
   void pageMoviesRecordWithFieldNull() {
 
+    //devo estar logado
+    login.navigate();
+    login.submit("admin@zombieplus.com", "pwd123");
+    login.isLoggedIn();
+
+    movies.goForm();
+    movies.submitForm();
+    movies.assertAlertsTexts(
+        "Por favor, informe o título.",
+        "Por favor, informe a sinopse.",
+        "Por favor, informe a empresa distribuidora.",
+        "Por favor, informe o ano de lançamento."
+    );
   }
 
 

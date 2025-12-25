@@ -9,50 +9,50 @@ public class LoginTest extends BaseTest {
   @Test
   @DisplayName("Deve Logar como Admin")
   void PageLoginAdmin() {
-    loginPage.navigate();
-    loginPage.submit("admin@zombieplus.com", "pwd123");
-    moviesPage.isLoggedIn();
+    login.navigate();
+    login.submit("admin@zombieplus.com", "pwd123");
+    login.isLoggedIn();
   }
 
   @Test
   @DisplayName("Não Deve Logar com senha incorreta")
   void PageLoginAdminIncorrectPassword() {
-    loginPage.navigate();
-    loginPage.submit("admin@zombieplus.com", "errada");
-    String message  = "Ocorreu um erro ao tentar efetuar o login. Por favor, verifique suas credenciais e tente novamente.";
+    login.navigate();
+    login.submit("admin@zombieplus.com", "errada");
+    String message = "Ocorreu um erro ao tentar efetuar o login. Por favor, verifique suas credenciais e tente novamente.";
     components.waitForToastMessageHidden(message);
   }
 
   @Test
   @DisplayName("Não Deve Logar quando o email é inválido")
   void PageLoginAdminEmailWithIncorrect() {
-    loginPage.navigate();
-    loginPage.submit("yuridiegotech.vercel", "abc123");
-    loginPage.assertAlertsTexts("Email incorreto");
+    login.navigate();
+    login.submit("yuridiegotech.vercel", "abc123");
+    login.assertAlertsTexts("Email incorreto");
   }
 
   @Test
   @DisplayName("Não Deve Logar quando o email nao é preenchido")
   void PageLoginAdminEmailNull() {
-    loginPage.navigate();
-    loginPage.submit("", "errada");
-    loginPage.assertAlertsTexts("Campo obrigatório");
+    login.navigate();
+    login.submit("", "errada");
+    login.assertAlertsTexts("Campo obrigatório");
   }
 
   @Test
   @DisplayName("Não Deve Logar quando o Senha nao é preenchido")
   void PageLoginAdminPasswordNull() {
-    loginPage.navigate();
-    loginPage.submit("Teste@teste.com", "");
-    loginPage.assertAlertsTexts("Campo obrigatório");
+    login.navigate();
+    login.submit("Teste@teste.com", "");
+    login.assertAlertsTexts("Campo obrigatório");
   }
 
   @Test
   @DisplayName("Não Deve Logar quando o Senha e Email nao é preenchido")
   void PageLoginAdminPasswordAndEmailWithNull() {
-    loginPage.navigate();
-    loginPage.submit("", "");
-    loginPage.assertAlertsTexts("Campo obrigatório","Campo obrigatório");
+    login.navigate();
+    login.submit("", "");
+    login.assertAlertsTexts("Campo obrigatório", "Campo obrigatório");
   }
 
 }

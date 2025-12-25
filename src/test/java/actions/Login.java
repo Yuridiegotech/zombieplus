@@ -1,15 +1,14 @@
-package pages;
+package actions;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.LoadState;
-import com.microsoft.playwright.options.WaitForSelectorState;
 
-public class LoginPage {
+public class Login {
 
   private final Page page;
 
-  public LoginPage(Page page) {
+  public Login(Page page) {
     this.page = page;
   }
 
@@ -19,7 +18,7 @@ public class LoginPage {
         .isVisible();
   }
 
-  public void submit (String email, String password) {
+  public void submit(String email, String password) {
     page.getByPlaceholder("E-mail")
         .fill(email);
     page.getByPlaceholder("Senha")
@@ -29,7 +28,6 @@ public class LoginPage {
   }
 
 
-
   public void assertAlertsTexts(String... expectedTexts) {
     Locator alerts = page.locator("span[class$=alert]");
     int count = alerts.count();
@@ -37,11 +35,16 @@ public class LoginPage {
     for (int i = 0; i < count; i++) {
       alerts.nth(i).waitFor(); // Aguarda cada alerta individualmente
       String actual = alerts.nth(i).textContent();
-      assert actual.contains(expectedTexts[i]) : "Esperado: " + expectedTexts[i] + ", Obtido: " + actual;
+      assert actual.contains(expectedTexts[i]) :
+          "Esperado: " + expectedTexts[i] + ", Obtido: " + actual;
     }
   }
 
 
+  public void isLoggedIn() {
+    page.waitForLoadState(LoadState.NETWORKIDLE);
+    page.waitForURL("**/admin/**");
+  }
 
 
 }
