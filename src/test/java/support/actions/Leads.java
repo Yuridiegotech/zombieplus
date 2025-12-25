@@ -1,4 +1,4 @@
-package actions;
+package support.actions;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;

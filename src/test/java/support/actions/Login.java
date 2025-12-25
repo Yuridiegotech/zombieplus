@@ -1,6 +1,9 @@
-package actions;
+package support.actions;
+
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Locator.FilterOptions;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.LoadState;
 
@@ -41,9 +44,16 @@ public class Login {
   }
 
 
-  public void isLoggedIn() {
-    page.waitForLoadState(LoadState.NETWORKIDLE);
-    page.waitForURL("**/admin/**");
+  public void isLoggedIn(String username) {
+    assertThat(page.locator(".logged-user")).hasText("Olá, " + username);
+  }
+
+  public void Login(String email, String password, String username) {
+
+    navigate();
+    submit(email, password);
+    isLoggedIn(username);
+
   }
 
 

@@ -18,16 +18,16 @@ public class MoviesTests extends BaseTest {
     database.executeSQL(String.format("DELETE FROM movies WHERE title = '" + movieTitle + "'"));
 
     //devo estar logado
-    login.navigate();
-    login.submit("admin@zombieplus.com", "pwd123");
-    login.isLoggedIn();
+    login.Login("admin@zombieplus.com", "pwd123", "Admin");
 
     //cadastrar novo filme
     movies.createNewMovie(
         MoviesData.getStringValue(movie, "title"),
         MoviesData.getStringValue(movie, "overview"),
         MoviesData.getStringValue(movie, "company"),
-        MoviesData.getIntegerValue(movie, "release_year")
+        MoviesData.getIntegerValue(movie, "release_year"),
+        MoviesData.getStringValue(movie, "cover"),
+        MoviesData.getBooleanValue(movie, "featured")
     );
     components.waitForToastMessageHidden("Cadastro realizado com sucesso!");
     page.waitForTimeout(5000);
@@ -38,10 +38,7 @@ public class MoviesTests extends BaseTest {
   void pageMoviesRecordWithFieldNull() {
 
     //devo estar logado
-    login.navigate();
-    login.submit("admin@zombieplus.com", "pwd123");
-    login.isLoggedIn();
-
+    login.Login("admin@zombieplus.com", "pwd123", "Admin");
     movies.goForm();
     movies.submitForm();
     movies.assertAlertsTexts(

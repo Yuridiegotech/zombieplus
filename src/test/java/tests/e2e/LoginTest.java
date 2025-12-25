@@ -11,7 +11,7 @@ public class LoginTest extends BaseTest {
   void PageLoginAdmin() {
     login.navigate();
     login.submit("admin@zombieplus.com", "pwd123");
-    login.isLoggedIn();
+    login.isLoggedIn("Admin");
   }
 
   @Test

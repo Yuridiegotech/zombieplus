@@ -6,10 +6,10 @@ import com.microsoft.playwright.Page;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.zombieplus.factory.BrowserFactory;
-import actions.Components;
-import actions.Leads;
-import actions.Login;
-import actions.Movies;
+import support.actions.Components;
+import support.actions.Leads;
+import support.actions.Login;
+import support.actions.Movies;
 
 public class BaseTest {
 
