@@ -11,8 +11,10 @@ import support.actions.Components;
 import support.actions.Leads;
 import support.actions.Login;
 import support.actions.Movies;
+import support.actions.TvShows;
 import support.api.LeadsApi;
 import support.api.MoviesApi;
+import support.api.TvShowsApi;
 
 public class BaseTest {
 
@@ -22,12 +24,14 @@ public class BaseTest {
 
   // Page Objects - disponíveis para todos os testes
   protected Movies movies;
+  protected TvShows tvShows;
   protected Login login;
   protected Leads leads;
   protected Components components;
 
   // API - disponível para todos os testes
   protected MoviesApi moviesApi;
+  protected TvShowsApi tvShowsApi;
   protected LeadsApi leadsApi;
 
   // Faker - disponível para todos os testes
@@ -42,12 +46,14 @@ public class BaseTest {
 
     // Inicializa todos os Page Objects automaticamente
     movies = new Movies(page);
+    tvShows = new TvShows(page);
     login = new Login(page);
     leads = new Leads(page);
     components = new Components(page);
 
     // Inicializa a API
     moviesApi = new MoviesApi(playwright);
+    tvShowsApi = new TvShowsApi(playwright);
     leadsApi = new LeadsApi(playwright);
 
     // Inicializa o Faker
@@ -70,6 +76,9 @@ public class BaseTest {
     // Fecha recursos
     if (moviesApi != null) {
       moviesApi.dispose();
+    }
+    if (tvShowsApi != null) {
+      tvShowsApi.dispose();
     }
     if (leadsApi != null) {
       leadsApi.dispose();

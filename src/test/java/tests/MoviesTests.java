@@ -4,7 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.BaseTest;
 import support.database;
-import support.fixtures.MoviesData;
+import support.fixtures.movies.MoviesData;
 
 public class MoviesTests extends BaseTest {
 
@@ -99,5 +99,36 @@ public class MoviesTests extends BaseTest {
         "Filme removido com sucesso.");
   }
 
+  @Test
+  @DisplayName("Deve realizar busca pelo termo zumbi")
+  void pageMoviesSearchMovie() {
+    var movie = MoviesData.get("search");
+
+    // Pega o array de filmes do JSON
+    var moviesList = MoviesData.getMoviesList(movie, "data");
+
+    // Deleta todos os filmes do array do banco de dados
+    for (var m : moviesList) {
+      String movieTitle = MoviesData.getStringValue(m, "title");
+      database.executeSQL(String.format("DELETE FROM movies WHERE title = '" + movieTitle + "'"));
+    }
+
+    // Cria todos os filmes via API
+    for (var m : moviesList) {
+      moviesApi.createMovie(m);
+    }
+
+    //devo estar logado
+    login.Login("admin@zombieplus.com", "pwd123", "Admin");
+
+    //realizar a busca
+    movies.searchMovie(MoviesData.getStringValue(movie, "input"));
+
+    // Valida que todos os títulos dos filmes criados estão nos resultados
+    var expectedTitles = moviesList.stream()
+        .map(m -> MoviesData.getStringValue(m, "title"))
+        .toList();
+    movies.assertSearchResults(expectedTitles);
+  }
 
 }

@@ -1,0 +1,60 @@
+{
+  "create": {
+    "title": "Guerra Mundial Z",
+    "overview": "Um ex-investigador da ONU percorre diferentes países em busca da origem de uma epidemia global que transforma pessoas em criaturas extremamente agressivas, na tentativa de evitar o colapso da humanidade.",
+    "company": "Paramount Pictures",
+    "release_year": 2013,
+    "featured": true,
+    "cover": "/covers/movies/wwz.png"
+  },
+  "duplicate": {
+    "title": "A Noite dos Mortos-Vivos",
+    "overview": "Um grupo de sobreviventes se refugia em uma casa abandonada enquanto hordas de mortos-vivos cercam o local. O filme que definiu o gênero zumbi moderno.",
+    "company": "Columbia Pictures",
+    "release_year": 1971,
+    "featured": false,
+    "cover": "/covers/movies/mortosvivos.jpg"
+  },
+  "delete": {
+    "title": "Resident Evil: O Hóspede Maldito",
+    "overview": "Uma força especial enfrenta uma inteligência artificial mortal e centenas de cientistas transformados em zumbis após um acidente em um laboratório subterrâneo da Corporação Umbrella.",
+    "company": "Columbia Pictures",
+    "release_year": 2002,
+    "featured": false,
+    "cover": "/covers/movies/resident-evil.jpg"
+  },
+  "search": {
+    "input": "zumbi",
+    "outputs": [
+      "Zumbilândia",
+      "Invasão Zumbi",
+      "Zumbilândia: Atire Duas Vezes"
+    ],
+    "data": [
+      {
+        "title": "Zumbilândia",
+        "overview": "Em um mundo pós-apocalíptico dominado por zumbis, um grupo improvável de sobreviventes segue um conjunto de regras peculiares para permanecer vivo enquanto viaja pelos Estados Unidos.",
+        "company": "Columbia Pictures",
+        "release_year": 2009,
+        "featured": true,
+        "cover": "/covers/movies/zumbilandia.jpg"
+      },
+      {
+        "title": "Invasão Zumbi",
+        "overview": "Dois vendedores de videogame precisam sobreviver a um apocalipse zumbi enquanto tentam salvar seus colegas de trabalho presos em uma loja.",
+        "company": "Fox Entertainment",
+        "release_year": 2008,
+        "featured": false,
+        "cover": "/covers/movies/madrugada.jpg"
+      },
+      {
+        "title": "Zumbilândia: Atire Duas Vezes",
+        "overview": "A equipe de caçadores de zumbis retorna para enfrentar novos tipos de mortos-vivos evoluídos e lidar com outros sobreviventes enquanto lutam para sobreviver.",
+        "company": "Universal Pictures",
+        "release_year": 2019,
+        "featured": false,
+        "cover": "/covers/movies/snow.jpg"
+      }
+    ]
+  }
+}

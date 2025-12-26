@@ -1,4 +1,4 @@
-package support.fixtures;
+package support.fixtures.tvshows;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -10,32 +10,31 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MoviesData {
+public class TvShowsData {
 
-  private static Map<String, Map<String, Object>> moviesData;
+  private static Map<String, Map<String, Object>> tvShowsData;
 
-  private static void loadMovies() {
-    if (moviesData == null) {
+  private static void loadTvShows() {
+    if (tvShowsData == null) {
       try (BufferedReader reader = new BufferedReader(
-          new FileReader("src/test/java/support/fixtures/movies.json"))) {
+          new FileReader("src/test/java/support/fixtures/tvshows/tvshows.json"))) {
         Gson gson = new Gson();
         Type type = new TypeToken<Map<String, Map<String, Object>>>() {
         }.getType();
-        moviesData = gson.fromJson(reader, type);
+        tvShowsData = gson.fromJson(reader, type);
       } catch (IOException e) {
-        throw new RuntimeException("Erro ao carregar arquivo movies.json: " + e.getMessage(), e);
+        throw new RuntimeException("Erro ao carregar arquivo tvshows.json: " + e.getMessage(), e);
       }
     }
   }
 
-  public static Map<String, Object> get(String movieKey) {
-    loadMovies();
-    Map<String, Object> movie = moviesData.get(movieKey);
-    if (movie == null) {
-      throw new RuntimeException("Filme não encontrado no JSON: " + movieKey);
+  public static Map<String, Object> get(String tvShowKey) {
+    loadTvShows();
+    Map<String, Object> tvShow = tvShowsData.get(tvShowKey);
+    if (tvShow == null) {
+      throw new RuntimeException("TV Show não encontrado no JSON: " + tvShowKey);
     }
-    // Retorna uma cópia para evitar modificações acidentais
-    return new HashMap<>(movie);
+    return new HashMap<>(tvShow);
   }
 
   public static String getStringValue(Map<String, Object> map, String key) {
@@ -56,6 +55,15 @@ public class MoviesData {
       return (Boolean) value;
     }
     throw new IllegalArgumentException("Valor não é booleano: " + value);
+  }
+
+  public static java.util.List<Map<String, Object>> getTvShowsList(Map<String, Object> map,
+      String key) {
+    Object value = map.get(key);
+    if (value instanceof java.util.List) {
+      return (java.util.List<Map<String, Object>>) value;
+    }
+    throw new IllegalArgumentException("Valor não é um array: " + value);
   }
 }
 
