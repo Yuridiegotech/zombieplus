@@ -1,4 +1,4 @@
-package tests.e2e;
+package tests;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,6 +75,28 @@ public class MoviesTests extends BaseTest {
         "Campo obrigatório",
         "Campo obrigatório"
     );
+  }
+
+  @Test
+  @DisplayName("Deve permitir excluir um filme")
+  void pageMoviesDeleteMovie() {
+    var movie = MoviesData.get("delete");
+
+    // Deleta o filme do banco de dados caso já exista
+    String movieTitle = MoviesData.getStringValue(movie, "title");
+    database.executeSQL(String.format("DELETE FROM movies WHERE title = '" + movieTitle + "'"));
+
+    // Insere o filme via API (massa de teste)
+    moviesApi.createMovie(movie);
+
+    //devo estar logado
+    login.Login("admin@zombieplus.com", "pwd123", "Admin");
+
+    //excluir o filme
+    movies.deleteMovie(movieTitle);
+
+    components.waitForPopupMessage(
+        "Filme removido com sucesso.");
   }
 
 

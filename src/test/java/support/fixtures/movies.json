@@ -15,13 +15,13 @@
     "featured": false,
     "cover": "/covers/movies/mortosvivos.jpg"
   },
-  "Zumbilândia": {
+  "delete": {
     "title": "Zumbilândia",
     "overview": "Em um mundo pós-apocalíptico dominado por zumbis, um grupo improvável de sobreviventes segue um conjunto de regras peculiares para permanecer vivo enquanto viaja pelos Estados Unidos.",
     "company": "Columbia Pictures",
     "release_year": 2009,
     "featured": true,
-    "cover": "covers/zumbilandia.jpg"
+    "cover": "/covers/movies/zumbilandia.jpg"
   },
   "Resident Evil: O Hóspede Maldito": {
     "title": "Resident Evil: O Hóspede Maldito",

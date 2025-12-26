@@ -60,4 +60,12 @@ public class Movies {
     submitForm();
   }
 
+  public void deleteMovie(String movieTitle) {
+//excluir o filme
+    page.getByRole(AriaRole.ROW, new Page.GetByRoleOptions().setName(movieTitle))
+        .getByRole(AriaRole.BUTTON)
+        .click();
+
+    page.locator(".confirm-removal").click();
+  }
 }
