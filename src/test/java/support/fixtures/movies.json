@@ -7,13 +7,13 @@
     "featured": true,
     "cover": "/covers/movies/wwz.png"
   },
-  "A Noite dos Mortos-Vivos": {
+  "duplicate": {
     "title": "A Noite dos Mortos-Vivos",
     "overview": "Um grupo de sobreviventes se refugia em uma casa abandonada enquanto hordas de mortos-vivos cercam o local. O filme que definiu o gênero zumbi moderno.",
-    "company": "Image Ten",
-    "release_year": 1968,
+    "company": "Columbia Pictures",
+    "release_year": 1971,
     "featured": false,
-    "cover": "covers/noite-dos-mortos-vivos.jpg"
+    "cover": "/covers/movies/mortosvivos.jpg"
   },
   "Zumbilândia": {
     "title": "Zumbilândia",

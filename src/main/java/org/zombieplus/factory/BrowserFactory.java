@@ -27,6 +27,13 @@ public class BrowserFactory {
     return browser.newContext();
   }
 
+  public static Playwright getPlaywright() {
+    if (playwright == null) {
+      playwright = Playwright.create();
+    }
+    return playwright;
+  }
+
   public static void close() {
     if (playwright != null) {
       playwright.close();

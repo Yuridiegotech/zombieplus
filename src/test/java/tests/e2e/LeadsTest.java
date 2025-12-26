@@ -1,6 +1,5 @@
 package tests.e2e;
 
-import com.microsoft.playwright.options.RequestOptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.BaseTest;
@@ -18,15 +17,8 @@ public class LeadsTest extends BaseTest {
     leads.fillName(leadName);
     leads.fillEmail(leadEmail);
     leads.submitLeadForm();
-    String message = "Agradecemos por compartilhar seus dados conosco. Em breve, nossa equipe entrará em contato!";
-    components.waitForToastMessageHidden(message);
-  }
-
-  @Test
-  @DisplayName("Deve cadastrar um lead na fila de espera")
-  void fluxoPrincipal1() {
-    page.navigate("https://google.com.br");
-    page.waitForTimeout(5000);
+    String message = "Agradecemos por compartilhar seus dados conosco. Em breve, nossa equipe entrará em contato.";
+    components.waitForPopupMessage(message);
   }
 
 
@@ -37,20 +29,18 @@ public class LeadsTest extends BaseTest {
     String leadEmail = faker.internet().emailAddress();
 
     // Cadastra o lead via API primeiro (massa de teste)
-    var newLead = page.request().post("http://localhost:3333/leads", RequestOptions.create()
-        .setData(java.util.Map.of(
-            "name", leadName,
-            "email", leadEmail
-        )));
-    assert newLead.status() == 201 : "Falha ao cadastrar lead via API";
+    var response = leadsApi.createLead(leadName, leadEmail);
+    assert
+        response.status() == 201 : "Falha ao cadastrar lead via API. Status: " + response.status();
+
     // Tenta cadastrar o mesmo lead via UI
     leads.navigate();
     leads.openLeadModal();
     leads.fillName(leadName);
     leads.fillEmail(leadEmail);
     leads.submitLeadForm();
-    String message2 = "O endereço de e-mail fornecido já está registrado em nossa fila de espera.";
-    components.waitForToastMessageHidden(message2);
+    String message = "Verificamos que o endereço de e-mail fornecido já consta em nossa lista de espera. Isso significa que você está um passo mais perto de aproveitar nossos serviços.";
+    components.waitForPopupMessage(message);
   }
 
   @Test

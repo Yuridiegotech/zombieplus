@@ -24,4 +24,11 @@ public class Components {
         );
   }
 
+  public void waitForPopupMessage(String message) {
+    page.locator(".swal2-html-container").getByText(message)
+        .waitFor(new Locator.WaitForOptions()
+            .setState(WaitForSelectorState.VISIBLE)
+        );
+  }
+
 }

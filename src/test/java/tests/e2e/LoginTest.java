@@ -20,7 +20,7 @@ public class LoginTest extends BaseTest {
     login.navigate();
     login.submit("admin@zombieplus.com", "errada");
     String message = "Ocorreu um erro ao tentar efetuar o login. Por favor, verifique suas credenciais e tente novamente.";
-    components.waitForToastMessageHidden(message);
+    components.waitForPopupMessage(message);
   }
 
   @Test
