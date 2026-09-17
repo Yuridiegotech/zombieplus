@@ -1,6 +1,6 @@
 # docker-compose.yml
 # Version of Docker Compose (use a recent 3.x version)
-version: "3.9"
+# Note: the "version" key is omitted to avoid deprecation warnings.
 
 name: zombieplus
 services:
@@ -57,7 +57,7 @@ services:
   # -------------------------------------------------
   # Serviço que executa a suite de testes regressivos.
   # Usa uma imagem oficial do Gradle (JDK 21 + Gradle 8).
-  # Monta o código fonte e a pasta de testes (copiada a partir do
+  # Monta o código fonte da API e a pasta de testes (copiada a partir do
   # repositório de testes) e exporta os relatórios para o runner.
   # -------------------------------------------------
   tests:
@@ -65,8 +65,8 @@ services:
     image: gradle:8.10-jdk21
     working_dir: /src
     volumes:
-      - ./:/src
-      - ./tests:/src/tests            # será preenchido na CI
+      - ./api:/src            # Monta o código da API
+      - ./tests:/src/tests    # será preenchido na CI
       - /tmp/ci-reports:/src/build/reports
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
