@@ -36,9 +36,9 @@ jobs:
           cd app-repo/api
           npm install --omit=dev
 
-      - name: Ensure tests directory exists
+      - name: Make Gradle wrapper executable
         run: |
-          mkdir -p app-repo/tests
+          chmod +x app-repo/../zombieplus/gradlew
 
       - name: Bring up services (app + tests)
         working-directory: app-repo

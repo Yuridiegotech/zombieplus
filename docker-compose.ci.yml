@@ -25,7 +25,7 @@ services:
       - database
     networks:
       - skynet
-    command: ./gradlew test
+    command: sh -c "chmod +x /src/tests/gradlew && ./gradlew test"
 
 networks:
   skynet:
