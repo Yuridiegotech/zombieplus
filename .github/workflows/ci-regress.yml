@@ -25,6 +25,7 @@ jobs:
         with:
           repository: Yuridiegotech/zombieplus-Testes   # <-- nome correto do repo de testes
           path: tests-repo
+          token: ${{ secrets.TESTS_PAT }}   # token com acesso ao repo privado
 
       - name: Prepare test suite folder
         run: |
