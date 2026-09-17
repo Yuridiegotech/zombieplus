@@ -39,6 +39,13 @@ jobs:
       - name: Make Gradle wrapper executable
         run: |
           chmod +x app-repo/../zombieplus/gradlew
+      - name: Install Playwright system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libglib2.0-0 libnss3 libatk-bridge2.0-0 libgtk-3-0 \
+            libx11-6 libxcomposite1 libxdamage1 libxext6 libxfixes3 \
+            libxrandr2 libgbm1 libcairo2 libpango-1.0-0 libasound2
 
       - name: Bring up services (app + tests)
         working-directory: app-repo

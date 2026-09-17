@@ -49,6 +49,7 @@ services:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
       DATABASE_PASSWORD: pwd123
+      DB_DIALECT: postgres
     depends_on:
       - database
     networks:
@@ -72,6 +73,7 @@ services:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
       DATABASE_PASSWORD: pwd123
+      DB_DIALECT: postgres
     depends_on:
       - database
       - app
