@@ -31,17 +31,14 @@ jobs:
         run: |
           mkdir -p app-repo/../zombieplus
           cp -r tests-repo/* app-repo/../zombieplus/
-      - name: Install npm dependencies
+      - name: Install npm dependencies (API)
         run: |
-          cd app-repo
-          npm ci --omit=dev
+          cd app-repo/api
+          npm install --omit=dev
 
-      - name: Install Docker Compose
+      - name: Ensure tests directory exists
         run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/v2.28.0/docker-compose-$(uname -s)-$(uname -m)" \
-            -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose version
+          mkdir -p app-repo/tests
 
       - name: Bring up services (app + tests)
         working-directory: app-repo

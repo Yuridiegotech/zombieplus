@@ -5,7 +5,6 @@
 # O caminho relativo "../zombieplus" funciona porque, no runner, os dois
 # repositórios são montados como sub‑pastas de "/sessions/…/mnt".
 # Caso você queira rodar localmente, ajuste o caminho para o local correto.
-version: "3.9"
 
 services:
   tests:
