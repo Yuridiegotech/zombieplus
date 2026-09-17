@@ -13,7 +13,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala as dependências (sem devDependencies, pois o CI não precisa de tooling)
-RUN npm ci --omit=dev
+RUN npm ci
 
 # Copia o restante do código da API
 COPY . ./
