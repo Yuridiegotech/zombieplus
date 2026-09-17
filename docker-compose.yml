@@ -36,19 +36,15 @@ services:
       - skynet
 
   # -------------------------------------------------
-  # Serviço da aplicação (API + frontend) – caso a aplicação
-  # já possua um Dockerfile ou seja construída via Gradle.
-  # Se a aplicação não precisar ser executada para os testes, pode
-  # ser removido; deixamos aqui como exemplo para quem quiser rodar
-  # a API localmente.
+  # Serviço da aplicação (API + frontend)
   # -------------------------------------------------
   app:
     container_name: zombieplus-app
     build:
-      context: .
-      dockerfile: Dockerfile   # ajuste se o Dockerfile estiver em outro local
+      context: ./api            # Diretório onde está o Dockerfile da API
+      dockerfile: Dockerfile    # Dockerfile localizado em api/Dockerfile
     ports:
-      - "3333:3333"           # porta da API (ajuste conforme sua configuração)
+      - "3333:3333"           # porta da API (ajuste se necessário)
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
@@ -68,11 +64,9 @@ services:
     container_name: zombieplus-tests
     image: gradle:8.10-jdk21
     working_dir: /src
-    # Montamos o código da aplicação (./) e a suite de testes (./tests)
-    # e um volume temporário para guardar os relatórios gerados.
     volumes:
       - ./:/src
-      - ./tests:/src/tests            # <- será preenchido na CI
+      - ./tests:/src/tests            # será preenchido na CI
       - /tmp/ci-reports:/src/build/reports
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
