@@ -19,10 +19,11 @@ jobs:
         with:
           path: app-repo
 
+      #--- Checkout do repositório de testes (nome correto) ---
       - name: Checkout test suite repo
         uses: actions/checkout@v4
         with:
-          repository: Yuridiegotech/zombieplus-tests
+          repository: Yuridiegotech/zombieplus-Testes   # <-- nome correto do repo de testes
           path: tests-repo
 
       - name: Prepare test suite folder
