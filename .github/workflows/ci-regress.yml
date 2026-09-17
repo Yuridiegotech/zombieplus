@@ -31,6 +31,10 @@ jobs:
         run: |
           mkdir -p app-repo/../zombieplus
           cp -r tests-repo/* app-repo/../zombieplus/
+      - name: Install npm dependencies
+        run: |
+          cd app-repo
+          npm ci --omit=dev
 
       - name: Install Docker Compose
         run: |

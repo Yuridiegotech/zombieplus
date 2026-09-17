@@ -66,7 +66,7 @@ services:
     working_dir: /src
     volumes:
       - ./api:/src            # Monta o código da API
-      - ./tests:/src/tests    # será preenchido na CI
+      - ./tests:/src/tests    # suite de testes
       - /tmp/ci-reports:/src/build/reports
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
@@ -74,6 +74,7 @@ services:
       DATABASE_PASSWORD: pwd123
     depends_on:
       - database
+      - app
     networks:
       - skynet
     command: ./gradlew test
