@@ -45,7 +45,7 @@ jobs:
         working-directory: app-repo
         run: |
           docker compose -f docker-compose.yml \
-                         -f docker-compose.ci.yml up --abort-on-container-exit
+                         -f docker-compose.ci.yml up --build --abort-on-container-exit
 
       - name: Wait for test container exit
         run: |
