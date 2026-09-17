@@ -1,0 +1,33 @@
+# docker-compose.ci.yml
+# Arquivo de overlay usado apenas na CI (GitHub Actions).
+# Ele adiciona o serviço "tests" que executa a suíte de regressão que está
+# no repositório de testes (F:/Workspace/Globo/zombieplus).
+# O caminho relativo "../zombieplus" funciona porque, no runner, os dois
+# repositórios são montados como sub‑pastas de "/sessions/…/mnt".
+# Caso você queira rodar localmente, ajuste o caminho para o local correto.
+version: "3.9"
+
+services:
+  tests:
+    container_name: zombieplus-tests
+    image: gradle:8.10-jdk21
+    working_dir: /src
+    # Monta o código da aplicação (este repositório) e a suite de testes
+    # que vem do repositório sibling "../zombieplus".
+    volumes:
+      - ./:/src                     # código da aplicação
+      - ../zombieplus:/src/tests     # suite de testes (repo de testes)
+      - /tmp/ci-reports:/src/build/reports
+    environment:
+      DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: pwd123
+    depends_on:
+      - database
+    networks:
+      - skynet
+    command: ./gradlew test
+
+networks:
+  skynet:
+    driver: bridge
