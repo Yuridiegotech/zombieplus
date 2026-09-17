@@ -1,0 +1,68 @@
+name: CI – Regressão Docker‑Compose
+
+on:
+  schedule:
+    - cron: "0 6 * * *"          # 06:00 BRT (UTC‑3) – ajuste se quiser outro horário
+  workflow_dispatch:               # permite execução manual a qualquer momento
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+
+    steps:
+      - name: Checkout application repo
+        uses: actions/checkout@v4
+        with:
+          path: app-repo
+
+      - name: Checkout test suite repo
+        uses: actions/checkout@v4
+        with:
+          repository: Yuridiegotech/zombieplus-tests
+          path: tests-repo
+
+      - name: Prepare test suite folder
+        run: |
+          mkdir -p app-repo/../zombieplus
+          cp -r tests-repo/* app-repo/../zombieplus/
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.28.0/docker-compose-$(uname -s)-$(uname -m)" \
+            -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose version
+
+      - name: Bring up services (app + tests)
+        working-directory: app-repo
+        run: |
+          docker compose -f docker-compose.yml \
+                         -f docker-compose.ci.yml up --abort-on-container-exit
+
+      - name: Wait for test container exit
+        run: |
+          docker wait zombieplus-tests
+
+      - name: Gather test reports
+        if: always()
+        run: |
+          mkdir -p reports
+          cp -r /tmp/ci-reports/* reports/ || true
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: reports/**
+
+      - name: Tear down Docker Compose
+        if: always()
+        working-directory: app-repo
+        run: |
+          docker compose -f docker-compose.yml \
+                         -f docker-compose.ci.yml down -v
