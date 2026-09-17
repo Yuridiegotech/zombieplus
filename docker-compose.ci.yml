@@ -9,7 +9,9 @@
 services:
   tests:
     container_name: zombieplus-tests
-    image: gradle:8.10-jdk21
+    build:
+      context: .
+      dockerfile: Dockerfile.tests
     working_dir: /src/tests
     # Monta o código da aplicação (este repositório) e a suite de testes
     # que vem do repositório sibling "../zombieplus".
