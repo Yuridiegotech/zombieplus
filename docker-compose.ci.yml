@@ -23,11 +23,13 @@ services:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
       DATABASE_PASSWORD: pwd123
+      BASE_URL: http://zombieplus-app:3333
     depends_on:
       - database
+      - app
     networks:
       - skynet
-    command: sh -c "chmod +x /src/tests/gradlew && ./gradlew test"
+    command: sh -c "chmod +x /src/tests/gradlew && until curl -s http://zombieplus-app:3333/health; do echo 'waiting for API...'; sleep 2; done && ./gradlew test"
 
 networks:
   skynet:
