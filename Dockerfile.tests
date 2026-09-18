@@ -1,10 +1,13 @@
 # Dockerfile.tests
 # Imagem customizada para executar testes de regressão com Playwright
-# Usa a imagem oficial do Playwright (já contém todas as libs necessárias) e adiciona Java 21 + Gradle + curl.
+# Usa a imagem oficial do Playwright (já contém todas as libs necessárias) e adiciona Java 21 + Gradle + curl + socat.
 FROM mcr.microsoft.com/playwright:v1.53.1-jammy
 
-# Instala JDK 21, Gradle e curl
-RUN apt-get update && apt-get install -y openjdk-21-jdk gradle curl && rm -rf /var/lib/apt/lists/*
+# Instala JDK 21, Gradle, curl e socat
+RUN apt-get update && apt-get install -y openjdk-21-jdk gradle curl socat && rm -rf /var/lib/apt/lists/*
+
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 # Diretório de trabalho dentro do container
 WORKDIR /src/tests

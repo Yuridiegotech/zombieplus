@@ -7,24 +7,35 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tests
+    ipc: host
+    shm_size: '2gb'
     working_dir: /src/tests
     volumes:
       - ./:/src
       - ../zombieplus:/src/tests
-      - /tmp/ci-reports:/src/build/reports
+      - /tmp/ci-reports:/src/tests/build/reports
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
       DATABASE_PASSWORD: pwd123
-      FRONT_URL: http://web:3000
-      BASE_URL: http://web:3000
+      FRONT_URL: http://localhost:3000
+      BASE_URL: http://localhost:3000
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      CI: "true"
     depends_on:
       - database
       - app
       - web
     networks:
       - skynet
-    command: sh -c "chmod +x /src/tests/gradlew && until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done && until curl -s http://web:3000/ | grep -q '<!DOCTYPE html>'; do echo 'waiting for UI...'; sleep 2; done && ./gradlew test"
+    command: >
+      sh -c "socat TCP-LISTEN:3333,fork,reuseaddr TCP:app:3333 &
+             socat TCP-LISTEN:3000,fork,reuseaddr TCP:web:3000 &
+             chmod +x /src/tests/gradlew &&
+             until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done &&
+             until curl -s http://web:3000/ | grep -q '<!DOCTYPE html>'; do echo 'waiting for UI...'; sleep 2; done &&
+             ./gradlew test --info"
 
 networks:
   skynet:
