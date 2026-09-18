@@ -51,7 +51,7 @@ services:
       DATABASE_PASSWORD: pwd123
       DB_DIALECT: postgres
       PORT: 3333
-      BASE_URL: http://zombieplus-app:3333
+      FRONT_URL: http://zombieplus-app:3333
     healthcheck:
       test: ["CMD","curl","-f","http://localhost:3333/health || exit 1"]
       interval: 5s
