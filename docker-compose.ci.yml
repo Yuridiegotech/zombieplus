@@ -20,6 +20,7 @@ services:
       DATABASE_PASSWORD: pwd123
       FRONT_URL: http://localhost:3000
       BASE_URL: http://localhost:3000
+      API_URL: http://localhost:3333
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
       CI: "true"
@@ -32,6 +33,7 @@ services:
     command: >
       sh -c "socat TCP-LISTEN:3333,fork,reuseaddr TCP:app:3333 &
              socat TCP-LISTEN:3000,fork,reuseaddr TCP:web:3000 &
+             socat TCP-LISTEN:5432,fork,reuseaddr TCP:database:5432 &
              chmod +x /src/tests/gradlew &&
              until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done &&
              until curl -s http://web:3000/ | grep -q '<!DOCTYPE html>'; do echo 'waiting for UI...'; sleep 2; done &&
