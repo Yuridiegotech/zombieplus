@@ -7,6 +7,9 @@
 # Caso você queira rodar localmente, ajuste o caminho para o local correto.
 
 services:
+  app:
+    volumes:
+      - ./web:/web
   tests:
     container_name: zombieplus-tests
     build:
