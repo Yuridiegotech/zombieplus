@@ -36,7 +36,7 @@ services:
              socat TCP-LISTEN:5432,fork,reuseaddr TCP:database:5432 &
              chmod +x /src/tests/gradlew &&
              until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done &&
-             until curl -s http://web:3000/ | grep -q '<!DOCTYPE html>'; do echo 'waiting for UI...'; sleep 2; done &&
+             until curl -s http://web:3000/ | grep -q 'Zombie+'; do echo 'waiting for UI...'; sleep 2; done &&
              xvfb-run -a ./gradlew test --info"
 
 networks:

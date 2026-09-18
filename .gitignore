@@ -39,6 +39,8 @@ yarn-error.log*
 
 # React build output (static bundle)
 build/
+!web/build/
+!web/build/**
 Dist/
 
 # Gradle (Java)
@@ -93,3 +95,5 @@ temp-*/
 # ------------------------------------------------------------
 !.env.example
 !docker/**/*.sh
+!web/build/
+!web/build/**
