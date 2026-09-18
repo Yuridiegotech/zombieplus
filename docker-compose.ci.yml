@@ -30,7 +30,7 @@ services:
       - app
     networks:
       - skynet
-    command: sh -c "cd /web && npm ci && npm run build && chmod +x /src/tests/gradlew && until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done && until curl -s http://app:3333/ | grep -q '<!DOCTYPE html>'; do echo 'waiting for UI...'; sleep 2; done && ./gradlew test"
+    command: >\n      sh -c "\n        cd /web && npm install && npm run build && chmod +x /src/tests/gradlew &&\n        until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done &&\n        until curl -s http://app:3333/ | grep -q '<!DOCTYPE html>'; do echo 'waiting for UI...'; sleep 2; done &&\n        ./gradlew test\n      "
 
 networks:
   skynet:
