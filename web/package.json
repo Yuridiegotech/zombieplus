@@ -4,6 +4,8 @@
   "description": "Zombie+ Webapp",
   "main": "index.js",
   "scripts": {
+    "start": "serve -s build -l 3000",
+    "dev": "serve -s build -l 3000",
     "build": "echo 'no build needed'"
   },
   "keywords": [

@@ -1,39 +1,30 @@
 # docker-compose.ci.yml
-# Arquivo de overlay usado apenas na CI (GitHub Actions).
-# Ele adiciona o serviço "tests" que executa a suíte de regressão que está
-# no repositório de testes (F:/Workspace/Globo/zombieplus).
-# O caminho relativo "../zombieplus" funciona porque, no runner, os dois
-# repositórios são montados como sub‑pastas de "/sessions/…/mnt".
-# Caso você queira rodar localmente, ajuste o caminho para o local correto.
+# Arquivo de overlay usado na CI (GitHub Actions).
 
 services:
-  app:
-    volumes:
-      - ./web:/web
   tests:
     container_name: zombieplus-tests
     build:
       context: .
       dockerfile: Dockerfile.tests
     working_dir: /src/tests
-    # Monta o código da aplicação (este repositório) e a suite de testes
-    # que vem do repositório sibling "../zombieplus".
     volumes:
-      - ./:/src                     # código da aplicação
-      - ../zombieplus:/src/tests     # suite de testes (repo de testes)
+      - ./:/src
+      - ../zombieplus:/src/tests
       - /tmp/ci-reports:/src/build/reports
-      - ./web:/web                 # monta o frontend para a API servir (caminho corrigido)
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
       DATABASE_PASSWORD: pwd123
-      FRONT_URL: http://app:3333
+      FRONT_URL: http://web:3000
+      BASE_URL: http://web:3000
     depends_on:
       - database
       - app
+      - web
     networks:
       - skynet
-    command: sh -c "cd /web && npm install && npm run build && chmod +x /src/tests/gradlew && until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done && until curl -s http://app:3333/ | grep -q '<!DOCTYPE html>'; do echo 'waiting for UI...'; sleep 2; done && ./gradlew test"
+    command: sh -c "chmod +x /src/tests/gradlew && until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done && until curl -s http://web:3000/ | grep -q '<!DOCTYPE html>'; do echo 'waiting for UI...'; sleep 2; done && ./gradlew test"
 
 networks:
   skynet:

@@ -1,19 +1,17 @@
 # docker-compose.yml
-# Version of Docker Compose (use a recent 3.x version)
-# Note: the "version" key is omitted to avoid deprecation warnings.
 
 name: zombieplus
 services:
   # -------------------------------------------------
-  # Banco de dados PostgreSQL (já existente)
+  # Banco de dados PostgreSQL
   # -------------------------------------------------
   database:
     container_name: pgdb
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: "zombieplus"       # banco criado automaticamente
-      POSTGRES_USER: "postgres"       # opcional, default é "postgres"
-      POSTGRES_PASSWORD: "pwd123"     # senha obrigatória
+      POSTGRES_DB: "zombieplus"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "pwd123"
     ports:
       - "5432:5432"
     networks:
@@ -36,24 +34,24 @@ services:
       - skynet
 
   # -------------------------------------------------
-  # Serviço da aplicação (API + frontend)
+  # Serviço da API (Node.js Express)
   # -------------------------------------------------
   app:
     container_name: zombieplus-app
     build:
-      context: ./api            # Diretório onde está o Dockerfile da API
-      dockerfile: Dockerfile    # Dockerfile localizado em api/Dockerfile
+      context: ./api
+      dockerfile: Dockerfile
     ports:
-      - "3333:3333"           # porta da API (ajuste se necessário)
+      - "3333:3333"
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
       DATABASE_PASSWORD: pwd123
       DB_DIALECT: postgres
       PORT: 3333
-      FRONT_URL: http://zombieplus-app:3333
+      FRONT_URL: http://localhost:3000
     healthcheck:
-      test: ["CMD","curl","-f","http://localhost:3333/health || exit 1"]
+      test: ["CMD", "curl", "-f", "http://localhost:3333/health"]
       interval: 5s
       timeout: 2s
       retries: 12
@@ -63,27 +61,42 @@ services:
       - skynet
 
   # -------------------------------------------------
-  # Serviço que executa a suite de testes regressivos.
-  # Usa uma imagem oficial do Gradle (JDK 21 + Gradle 8).
-  # Monta o código fonte da API e a pasta de testes (copiada a partir do
-  # repositório de testes) e exporta os relatórios para o runner.
+  # Serviço do Frontend Web (React / serve)
+  # -------------------------------------------------
+  web:
+    container_name: zombieplus-web
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - app
+    networks:
+      - skynet
+
+  # -------------------------------------------------
+  # Serviço de Testes
   # -------------------------------------------------
   tests:
     container_name: zombieplus-tests
     image: gradle:8.10-jdk21
     working_dir: /src
     volumes:
-      - ./api:/src            # Monta o código da API
-      - ./tests:/src/tests    # suite de testes
+      - ./api:/src
+      - ./tests:/src/tests
       - /tmp/ci-reports:/src/build/reports
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
       DATABASE_PASSWORD: pwd123
       DB_DIALECT: postgres
+      FRONT_URL: http://web:3000
+      BASE_URL: http://web:3000
     depends_on:
       - database
       - app
+      - web
     networks:
       - skynet
     command: ./gradlew test
