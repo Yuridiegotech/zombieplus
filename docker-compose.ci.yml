@@ -35,7 +35,7 @@ services:
              chmod +x /src/tests/gradlew &&
              until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done &&
              until curl -s http://web:3000/ | grep -q '<!DOCTYPE html>'; do echo 'waiting for UI...'; sleep 2; done &&
-             ./gradlew test --info"
+             xvfb-run -a ./gradlew test --info"
 
 networks:
   skynet:
