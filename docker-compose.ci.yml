@@ -19,6 +19,7 @@ services:
       - ./:/src                     # código da aplicação
       - ../zombieplus:/src/tests     # suite de testes (repo de testes)
       - /tmp/ci-reports:/src/build/reports
+      - ../web:/web                 # monta o frontend para a API servir
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
