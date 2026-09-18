@@ -4,7 +4,7 @@
   "description": "Zombie+ Webapp",
   "main": "index.js",
   "scripts": {
-    "build": "echo 'no build needed'",
+    "build": "echo 'no build needed'"
   },
   "keywords": [
     "zombieplus",
