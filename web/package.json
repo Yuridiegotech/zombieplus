@@ -4,7 +4,7 @@
   "description": "Zombie+ Webapp",
   "main": "index.js",
   "scripts": {
-    "dev": "npx serve -s build"
+    "build": "echo 'no build needed'",
   },
   "keywords": [
     "zombieplus",
