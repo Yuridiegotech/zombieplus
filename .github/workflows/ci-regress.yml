@@ -91,21 +91,102 @@ jobs:
       - name: Prepare GitHub Pages showcase portal
         if: always()
         run: |
+          set -euo pipefail
+
+          # ── 1. Copy portfolio static files ──
           mkdir -p gh-pages-deploy
           cp -r app-repo/portfolio/* gh-pages-deploy/
-          mkdir -p gh-pages-deploy/allure-report
-          cp -r allure-history/* gh-pages-deploy/allure-report/
 
-          RUN_NUM="${{ github.run_number }}"
-          if [ -d "allure-history/$RUN_NUM" ]; then
-            mkdir -p gh-pages-deploy/allure-report/latest
-            cp -r allure-history/$RUN_NUM/* gh-pages-deploy/allure-report/latest/
-          elif [ -d "allure-history/allure-report/$RUN_NUM" ]; then
-            mkdir -p gh-pages-deploy/allure-report/latest
-            cp -r allure-history/allure-report/$RUN_NUM/* gh-pages-deploy/allure-report/latest/
+          # ── 2. Copy full allure-history (numbered folders + data) ──
+          mkdir -p gh-pages-deploy/allure-report
+          if [ -d "allure-history" ]; then
+            cp -r allure-history/* gh-pages-deploy/allure-report/ 2>/dev/null || true
           fi
 
-          find allure-history -name "history-trend.json" | head -n 1 | xargs -I {} cp {} gh-pages-deploy/allure-report/history-trend.json || true
+          # ── 3. Create /allure-report/latest/ pointing to current run ──
+          RUN_NUM="${{ github.run_number }}"
+          LATEST_SRC=""
+          if [ -d "allure-history/$RUN_NUM" ]; then
+            LATEST_SRC="allure-history/$RUN_NUM"
+          elif [ -d "allure-report" ] && [ -f "allure-report/index.html" ]; then
+            LATEST_SRC="allure-report"
+          fi
+          if [ -n "$LATEST_SRC" ]; then
+            rm -rf gh-pages-deploy/allure-report/latest
+            mkdir -p gh-pages-deploy/allure-report/latest
+            cp -r "$LATEST_SRC"/* gh-pages-deploy/allure-report/latest/
+          fi
+
+          # ── 4. Copy history-trend.json to root of allure-report ──
+          find allure-history -name "history-trend.json" 2>/dev/null | head -n 1 | \
+            xargs -I {} cp {} gh-pages-deploy/allure-report/history-trend.json || true
+
+          # ── 5. Generate runs-manifest.json with the last 5 runs ──
+          # Merge with previous manifest from gh-pages (if exists)
+          PREV_MANIFEST=""
+          if [ -f "gh-pages/allure-report/runs-manifest.json" ]; then
+            PREV_MANIFEST=$(cat gh-pages/allure-report/runs-manifest.json)
+          fi
+
+          # Collect current run data from allure widgets
+          CURRENT_PASSED=0
+          CURRENT_FAILED=0
+          CURRENT_BROKEN=0
+          CURRENT_SKIPPED=0
+          CURRENT_TOTAL=0
+          SUMMARY_FILE=""
+          for f in \
+            "allure-report/widgets/summary.json" \
+            "allure-history/$RUN_NUM/widgets/summary.json" \
+            "gh-pages-deploy/allure-report/latest/widgets/summary.json"; do
+            if [ -f "$f" ]; then
+              SUMMARY_FILE="$f"
+              break
+            fi
+          done
+
+          if [ -n "$SUMMARY_FILE" ]; then
+            CURRENT_PASSED=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('passed',0))" 2>/dev/null || echo 0)
+            CURRENT_FAILED=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('failed',0))" 2>/dev/null || echo 0)
+            CURRENT_BROKEN=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('broken',0))" 2>/dev/null || echo 0)
+            CURRENT_SKIPPED=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('skipped',0))" 2>/dev/null || echo 0)
+            CURRENT_TOTAL=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('total',0))" 2>/dev/null || echo 0)
+          fi
+
+          CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          # Build the new manifest with Python (merge + prepend current run, keep last 5)
+          python3 -c "
+          import json, sys
+
+          prev_runs = []
+          prev_raw = '''$PREV_MANIFEST'''
+          if prev_raw.strip():
+              try:
+                  prev_data = json.loads(prev_raw)
+                  prev_runs = prev_data.get('runs', [])
+              except: pass
+
+          current = {
+              'buildNum': $RUN_NUM,
+              'date': '$CURRENT_DATE',
+              'passed': int('$CURRENT_PASSED' or 0),
+              'failed': int('$CURRENT_FAILED' or 0) + int('$CURRENT_BROKEN' or 0),
+              'skipped': int('$CURRENT_SKIPPED' or 0),
+              'total': int('$CURRENT_TOTAL' or 0)
+          }
+
+          # Remove duplicate if same buildNum exists
+          prev_runs = [r for r in prev_runs if r.get('buildNum') != $RUN_NUM]
+          all_runs = [current] + prev_runs
+          all_runs = all_runs[:5]
+
+          manifest = {
+              'lastUpdated': '$CURRENT_DATE',
+              'runs': all_runs
+          }
+          print(json.dumps(manifest, indent=2))
+          " > gh-pages-deploy/allure-report/runs-manifest.json
 
       - name: Deploy report to GitHub Pages
         if: always()
