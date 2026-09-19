@@ -1,0 +1,104 @@
+name: CI – Regressão Docker‑Compose
+
+on:
+  schedule:
+    - cron: "0 6 * * *"          # 06:00 BRT (UTC‑3) – ajuste se quiser outro horário
+  workflow_dispatch:               # permite execução manual a qualquer momento
+
+permissions:
+  contents: write
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+
+    steps:
+      - name: Checkout application repo
+        uses: actions/checkout@v4
+        with:
+          path: app-repo
+
+      #--- Checkout do repositório de testes (nome correto) ---
+      - name: Checkout test suite repo
+        uses: actions/checkout@v4
+        with:
+          repository: Yuridiegotech/zombieplus-Testes   # <-- nome correto do repo de testes
+          path: tests-repo
+          token: ${{ secrets.TESTS_PAT }}   # token com acesso ao repo privado
+
+      - name: Prepare test suite folder
+        run: |
+          mkdir -p app-repo/../zombieplus
+          cp -r tests-repo/* app-repo/../zombieplus/
+      - name: Install npm dependencies (API)
+        run: |
+          cd app-repo/api
+          npm install --omit=dev
+
+      - name: Make Gradle wrapper executable
+        run: |
+          chmod +x app-repo/../zombieplus/gradlew
+      # Playwright dependencies are now part of Dockerfile.tests
+
+      - name: Bring up services (app + tests)
+        working-directory: app-repo
+        run: |
+          docker compose -f docker-compose.yml \
+                         -f docker-compose.ci.yml up --build --abort-on-container-exit
+
+      - name: Wait for test container exit
+        run: |
+          docker wait zombieplus-tests
+
+      - name: Gather test reports
+        if: always()
+        run: |
+          mkdir -p reports
+          cp -r /tmp/ci-reports/* reports/ || true
+          mkdir -p reports/allure-results
+          cp -r /tmp/ci-allure-results/* reports/allure-results/ || true
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: reports/**
+
+      - name: Get Allure history
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Generate Allure Report with History
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        id: allure-report
+        with:
+          allure_results: reports/allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+          keep_reports: 20
+
+      - name: Deploy report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+
+      - name: Tear down Docker Compose
+        if: always()
+        working-directory: app-repo
+        run: |
+          docker compose -f docker-compose.yml \
+                         -f docker-compose.ci.yml down -v
