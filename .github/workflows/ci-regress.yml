@@ -88,13 +88,21 @@ jobs:
           allure_history: allure-history
           keep_reports: 20
 
+      - name: Prepare GitHub Pages showcase portal
+        if: always()
+        run: |
+          mkdir -p gh-pages-deploy
+          cp -r app-repo/portfolio/* gh-pages-deploy/
+          mkdir -p gh-pages-deploy/allure-report
+          cp -r allure-history/* gh-pages-deploy/allure-report/
+
       - name: Deploy report to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: allure-history
+          publish_dir: gh-pages-deploy
 
       - name: Tear down Docker Compose
         if: always()
