@@ -23,22 +23,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Load Allure Real Metrics & History dynamically
-  // Try loading from subfolder allure-report or direct
+  // Load Allure Real Metrics & History dynamically (Last 3 - 5 runs)
   const historyUrls = [
-    './allure-report/widgets/history-trend.json',
-    './allure-report/40/widgets/history-trend.json',
-    './allure-report/latest/widgets/history-trend.json'
+    './allure-report/history-trend.json',
+    './allure-report/latest/widgets/history-trend.json',
+    './allure-report/40/widgets/history-trend.json'
   ];
 
   async function loadAllureData() {
     let historyData = null;
     for (const url of historyUrls) {
       try {
-        const res = await fetch(url);
+        const res = await fetch(url + '?t=' + Date.now());
         if (res.ok) {
           historyData = await res.json();
-          break;
+          if (Array.isArray(historyData) && historyData.length > 0) {
+            break;
+          }
         }
       } catch (e) {
         // try next
@@ -49,12 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const historyList = document.getElementById('historyRunsList');
       const latestRun = historyData[0];
       const latestBuildOrder = latestRun.buildOrder || latestRun.data?.buildOrder || 40;
-
-      // Update hero & live card button links to latest build
-      const allureButtons = document.querySelectorAll('a[href="./allure-report/"], a[href="./allure-report"]');
-      allureButtons.forEach(btn => {
-        btn.href = `./allure-report/${latestBuildOrder}/`;
-      });
 
       // Update Live stats with real data
       const passed = latestRun.data?.passed ?? 22;
@@ -68,14 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const liveRateEl = document.querySelector('.report-stat-item .val.rate');
       if (liveRateEl) liveRateEl.textContent = `${successRate}%`;
 
-      // Render History list
+      // Render Last 3-5 Runs in the History list
       if (historyList) {
         historyList.innerHTML = '';
         const runsToShow = historyData.slice(0, 5);
         runsToShow.forEach((run, index) => {
           const isLatest = index === 0;
           const buildNum = run.buildOrder || run.data?.buildOrder || (index === 0 ? latestBuildOrder : latestBuildOrder - index);
-          const buildUrl = `./allure-report/${buildNum}/`;
+          const buildUrl = isLatest ? './allure-report/latest/' : `./allure-report/${buildNum}/`;
           const runPassed = run.data?.passed ?? 22;
           const runTotal = run.data?.total ?? 22;
           const runFailed = (run.data?.failed || 0) + (run.data?.broken || 0);
@@ -88,8 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="run-info">
               <span class="run-badge">#${buildNum}</span>
               <div>
-                <div style="font-weight: 600; font-size: 14px;">${run.reportName || (isLatest ? 'Regressão Docker-Compose (Latest)' : 'Execução CI')}</div>
-                <div class="run-date">${isLatest ? 'Última Execução GitHub Actions' : 'Histórico de Execução'}</div>
+                <div style="font-weight: 600; font-size: 14px;">${isLatest ? 'Regressão Docker-Compose (Última)' : 'Execução Regressão CI'}</div>
+                <div class="run-date">${isLatest ? 'Execução Mais Recente' : `Build #${buildNum}`}</div>
               </div>
             </div>
             <div class="run-status">
