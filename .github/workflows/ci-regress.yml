@@ -96,6 +96,17 @@ jobs:
           mkdir -p gh-pages-deploy/allure-report
           cp -r allure-history/* gh-pages-deploy/allure-report/
 
+          RUN_NUM="${{ github.run_number }}"
+          if [ -d "allure-history/$RUN_NUM" ]; then
+            mkdir -p gh-pages-deploy/allure-report/latest
+            cp -r allure-history/$RUN_NUM/* gh-pages-deploy/allure-report/latest/
+          elif [ -d "allure-history/allure-report/$RUN_NUM" ]; then
+            mkdir -p gh-pages-deploy/allure-report/latest
+            cp -r allure-history/allure-report/$RUN_NUM/* gh-pages-deploy/allure-report/latest/
+          fi
+
+          find allure-history -name "history-trend.json" | head -n 1 | xargs -I {} cp {} gh-pages-deploy/allure-report/history-trend.json || true
+
       - name: Deploy report to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v3
