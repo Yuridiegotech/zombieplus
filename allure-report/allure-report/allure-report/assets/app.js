@@ -23,50 +23,87 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Load Allure History dynamically if present
-  fetch('./allure-report/widgets/history-trend.json')
-    .then(response => {
-      if (response.ok) return response.json();
-      throw new Error('No history-trend.json found');
-    })
-    .then(data => {
-      if (Array.isArray(data) && data.length > 0) {
-        const historyList = document.getElementById('historyRunsList');
-        if (historyList) {
-          historyList.innerHTML = '';
-          // Take the last 5 builds
-          const runs = data.slice(0, 5);
-          runs.forEach((run, index) => {
-            const isLatest = index === 0;
-            const buildUrl = isLatest ? './allure-report/' : `./allure-report/${run.data?.buildOrder || index}/`;
-            const passed = run.data?.passed || 22;
-            const total = run.data?.total || 22;
-            const buildNum = run.data?.buildOrder ? `#${run.data.buildOrder}` : (isLatest ? 'Latest' : `#${runs.length - index}`);
-            
-            const item = document.createElement('a');
-            item.href = buildUrl;
-            item.className = `run-item ${isLatest ? 'latest' : ''}`;
-            item.innerHTML = `
-              <div class="run-info">
-                <span class="run-badge">${buildNum}</span>
-                <div>
-                  <div style="font-weight: 600; font-size: 14px;">${run.reportName || 'Regressão Docker-Compose'}</div>
-                  <div class="run-date">${run.data?.reportUrl ? 'GitHub Actions CI' : 'Execução Automatizada'}</div>
-                </div>
-              </div>
-              <div class="run-status">
-                <i class="fa-solid fa-circle-check"></i> ${passed}/${total} Passou
-              </div>
-            `;
-            historyList.appendChild(item);
-          });
+  // Load Allure Real Metrics & History dynamically
+  // Try loading from subfolder allure-report or direct
+  const historyUrls = [
+    './allure-report/widgets/history-trend.json',
+    './allure-report/40/widgets/history-trend.json',
+    './allure-report/latest/widgets/history-trend.json'
+  ];
+
+  async function loadAllureData() {
+    let historyData = null;
+    for (const url of historyUrls) {
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          historyData = await res.json();
+          break;
         }
+      } catch (e) {
+        // try next
       }
-    })
-    .catch(() => {
-      // Keep default static fallback list if fetch fails
-      console.log('Using default history list for Allure runs.');
-    });
+    }
+
+    if (historyData && Array.isArray(historyData) && historyData.length > 0) {
+      const historyList = document.getElementById('historyRunsList');
+      const latestRun = historyData[0];
+      const latestBuildOrder = latestRun.buildOrder || latestRun.data?.buildOrder || 40;
+
+      // Update hero & live card button links to latest build
+      const allureButtons = document.querySelectorAll('a[href="./allure-report/"], a[href="./allure-report"]');
+      allureButtons.forEach(btn => {
+        btn.href = `./allure-report/${latestBuildOrder}/`;
+      });
+
+      // Update Live stats with real data
+      const passed = latestRun.data?.passed ?? 22;
+      const total = latestRun.data?.total ?? 22;
+      const failed = (latestRun.data?.failed || 0) + (latestRun.data?.broken || 0);
+      const successRate = total > 0 ? Math.round((passed / total) * 100) : 100;
+
+      const livePassedEl = document.querySelector('.report-stat-item .val.pass');
+      if (livePassedEl) livePassedEl.textContent = `${passed} / ${total}`;
+
+      const liveRateEl = document.querySelector('.report-stat-item .val.rate');
+      if (liveRateEl) liveRateEl.textContent = `${successRate}%`;
+
+      // Render History list
+      if (historyList) {
+        historyList.innerHTML = '';
+        const runsToShow = historyData.slice(0, 5);
+        runsToShow.forEach((run, index) => {
+          const isLatest = index === 0;
+          const buildNum = run.buildOrder || run.data?.buildOrder || (index === 0 ? latestBuildOrder : latestBuildOrder - index);
+          const buildUrl = `./allure-report/${buildNum}/`;
+          const runPassed = run.data?.passed ?? 22;
+          const runTotal = run.data?.total ?? 22;
+          const runFailed = (run.data?.failed || 0) + (run.data?.broken || 0);
+
+          const item = document.createElement('a');
+          item.href = buildUrl;
+          item.target = '_blank';
+          item.className = `run-item ${isLatest ? 'latest' : ''}`;
+          item.innerHTML = `
+            <div class="run-info">
+              <span class="run-badge">#${buildNum}</span>
+              <div>
+                <div style="font-weight: 600; font-size: 14px;">${run.reportName || (isLatest ? 'Regressão Docker-Compose (Latest)' : 'Execução CI')}</div>
+                <div class="run-date">${isLatest ? 'Última Execução GitHub Actions' : 'Histórico de Execução'}</div>
+              </div>
+            </div>
+            <div class="run-status">
+              <i class="fa-solid ${runFailed === 0 ? 'fa-circle-check' : 'fa-circle-xmark'}" style="color: ${runFailed === 0 ? 'var(--primary)' : 'var(--accent-red)'}"></i>
+              ${runPassed}/${runTotal} Passou
+            </div>
+          `;
+          historyList.appendChild(item);
+        });
+      }
+    }
+  }
+
+  loadAllureData();
 
   // Animated metric counters
   const counters = document.querySelectorAll('.metric-num');
