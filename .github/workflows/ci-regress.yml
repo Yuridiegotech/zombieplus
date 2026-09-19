@@ -103,6 +103,14 @@ jobs:
             cp -r allure-history/* gh-pages-deploy/allure-report/ 2>/dev/null || true
           fi
 
+          # ── 2b. PRESERVE allure-history on gh-pages for next run ──
+          # The simple-elf/allure-report-action looks for history at gh-pages/allure-history/
+          # Without this, each run starts fresh and history is lost.
+          mkdir -p gh-pages-deploy/allure-history
+          if [ -d "allure-history" ]; then
+            cp -r allure-history/* gh-pages-deploy/allure-history/ 2>/dev/null || true
+          fi
+
           # ── 3. Create /allure-report/latest/ pointing to current run ──
           RUN_NUM="${{ github.run_number }}"
           LATEST_SRC=""
