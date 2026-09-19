@@ -56,6 +56,8 @@ jobs:
         run: |
           mkdir -p reports
           cp -r /tmp/ci-reports/* reports/ || true
+          mkdir -p reports/allure-results
+          cp -r /tmp/ci-allure-results/* reports/allure-results/ || true
 
       - name: Upload test reports
         if: always()

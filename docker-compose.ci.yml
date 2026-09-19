@@ -14,6 +14,7 @@ services:
       - ./:/src
       - ../zombieplus:/src/tests
       - /tmp/ci-reports:/src/tests/build/reports
+      - /tmp/ci-allure-results:/src/tests/build/allure-results
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
@@ -37,8 +38,9 @@ services:
              chmod +x /src/tests/gradlew &&
              until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done &&
              until curl -s http://web:3000/ | grep -q 'Zombie+'; do echo 'waiting for UI...'; sleep 2; done &&
-             xvfb-run -a ./gradlew test --info"
+             xvfb-run -a ./gradlew test --info; TEST_STATUS=$$?; ./gradlew allureReport --info || true; exit $$TEST_STATUS"
 
 networks:
   skynet:
     driver: bridge
+
