@@ -1,1 +1,0 @@
-{"id":"1dfc219d-2b49-4ed4-be0f-237d9bbf193c","name":"Boyd Russel","email":"federico.bauch@hotmail.com","updatedAt":"2026-09-19T02:31:26.655Z","createdAt":"2026-09-19T02:31:26.655Z"}

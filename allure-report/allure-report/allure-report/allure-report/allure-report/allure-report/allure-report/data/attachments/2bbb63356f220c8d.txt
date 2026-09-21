@@ -1,1 +1,0 @@
-DELETE FROM tvshows WHERE title = 'Fear the Walking Dead'
