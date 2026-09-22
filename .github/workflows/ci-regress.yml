@@ -110,7 +110,11 @@ jobs:
 
           # ── 1. Copiar arquivos estáticos do portal portfolio ──
           mkdir -p gh-pages-deploy
-          cp -r app-repo/portfolio/* gh-pages-deploy/
+          if [ -d "app-repo/portfolio" ]; then
+            cp -r app-repo/portfolio/* gh-pages-deploy/
+          elif [ -d "gh-pages" ]; then
+            cp -r gh-pages/* gh-pages-deploy/ 2>/dev/null || true
+          fi
 
           # ── 2. Preservar relatórios e histórico anteriores do gh-pages ──
           mkdir -p gh-pages-deploy/allure-report
@@ -120,7 +124,10 @@ jobs:
 
           # ── 3. Publicar o relatório da execução atual em /latest e /<RUN_NUM> ──
           RUN_NUM="${{ github.run_number }}"
+          RUN_ID="${{ github.run_id }}"
+          HAS_ALLURE=false
           if [ -d "allure-report" ] && [ -f "allure-report/index.html" ]; then
+            HAS_ALLURE=true
             mkdir -p gh-pages-deploy/allure-report/latest
             cp -r allure-report/* gh-pages-deploy/allure-report/latest/
             mkdir -p "gh-pages-deploy/allure-report/$RUN_NUM"
@@ -150,6 +157,8 @@ jobs:
           CURRENT_BROKEN=0
           CURRENT_SKIPPED=0
           CURRENT_TOTAL=0
+          PIPELINE_ERROR="false"
+
           SUMMARY_FILE=""
           for f in \
             "allure-report/widgets/summary.json" \
@@ -160,12 +169,16 @@ jobs:
             fi
           done
 
-          if [ -n "$SUMMARY_FILE" ]; then
+          if [ "$HAS_ALLURE" = "true" ] && [ -n "$SUMMARY_FILE" ]; then
             CURRENT_PASSED=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('passed',0))" 2>/dev/null || echo 0)
             CURRENT_FAILED=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('failed',0))" 2>/dev/null || echo 0)
             CURRENT_BROKEN=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('broken',0))" 2>/dev/null || echo 0)
             CURRENT_SKIPPED=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('skipped',0))" 2>/dev/null || echo 0)
             CURRENT_TOTAL=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('total',0))" 2>/dev/null || echo 0)
+          else
+            # Caso não tenha gerado Allure Report: registrar falha de pipeline
+            PIPELINE_ERROR="true"
+            CURRENT_FAILED=1
           fi
 
           CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -184,11 +197,13 @@ jobs:
 
           current = {
               'buildNum': $RUN_NUM,
+              'runId': '$RUN_ID',
               'date': '$CURRENT_DATE',
               'passed': int('$CURRENT_PASSED' or 0),
               'failed': int('$CURRENT_FAILED' or 0) + int('$CURRENT_BROKEN' or 0),
               'skipped': int('$CURRENT_SKIPPED' or 0),
-              'total': int('$CURRENT_TOTAL' or 0)
+              'total': int('$CURRENT_TOTAL' or 0),
+              'pipelineError': '$PIPELINE_ERROR' == 'true'
           }
 
           # Remove duplicate if same buildNum exists
