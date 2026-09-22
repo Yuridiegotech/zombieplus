@@ -204,7 +204,7 @@ jobs:
           " > gh-pages-deploy/allure-report/runs-manifest.json
 
       - name: Deploy report to GitHub Pages
-        if: always()
+        if: always() && hashFiles('gh-pages-deploy/index.html') != ''
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
