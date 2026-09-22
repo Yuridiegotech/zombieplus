@@ -63,7 +63,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // ──────────────────────────────────────────
   //  Render logic
   // ──────────────────────────────────────────
-  function updateLiveCard(passed, total, failed) {
+  function updateLiveCard(passed, total, failed, isPipelineError) {
+    if (isPipelineError) {
+      const passEl = document.querySelector('.report-stat-item .val.pass');
+      if (passEl) passEl.textContent = `0 / 0`;
+
+      const rateEl = document.querySelector('.report-stat-item .val.rate');
+      if (rateEl) {
+        rateEl.textContent = `0% (Falha)`;
+        rateEl.style.color = 'var(--accent-red)';
+      }
+      return;
+    }
+
     const rate = total > 0 ? Math.round((passed / total) * 100) : 0;
 
     const passEl = document.querySelector('.report-stat-item .val.pass');
@@ -88,11 +100,22 @@ document.addEventListener('DOMContentLoaded', () => {
       a.target = '_blank';
       a.className = 'run-item' + (isLatest ? ' latest' : '');
 
-      const statusIcon = run.failed === 0 ? 'fa-circle-check' : 'fa-circle-xmark';
-      const statusColor = run.failed === 0 ? 'var(--primary)' : 'var(--accent-red)';
-      const statusText  = run.failed === 0
-        ? `${run.passed}/${run.total} Passou`
-        : `${run.passed}/${run.total} (${run.failed} falha${run.failed > 1 ? 's' : ''})`;
+      const isPipelineError = run.pipelineError === true || (run.total === 0 && run.failed > 0);
+      let statusIcon, statusColor, statusText;
+
+      if (isPipelineError) {
+        statusIcon = 'fa-triangle-exclamation';
+        statusColor = 'var(--accent-red)';
+        statusText = 'Falha no Pipeline / Infra';
+      } else if (run.failed === 0) {
+        statusIcon = 'fa-circle-check';
+        statusColor = 'var(--primary)';
+        statusText = `${run.passed}/${run.total} Passou`;
+      } else {
+        statusIcon = 'fa-circle-xmark';
+        statusColor = 'var(--accent-red)';
+        statusText = `${run.passed}/${run.total} (${run.failed} falha${run.failed > 1 ? 's' : ''})`;
+      }
 
       a.innerHTML = `
         <div class="run-info">
@@ -124,17 +147,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const latest = runsToShow[0];
 
     // Update live card
-    updateLiveCard(latest.passed ?? 0, latest.total ?? 0, latest.failed ?? 0);
+    const isLatestPipelineError = latest.pipelineError === true || (latest.total === 0 && latest.failed > 0);
+    updateLiveCard(latest.passed ?? 0, latest.total ?? 0, latest.failed ?? 0, isLatestPipelineError);
 
     // Build run entries
-    const entries = runsToShow.map((run, idx) => ({
-      buildNum: run.buildNum || run.runNumber || '?',
-      url: idx === 0 ? './allure-report/latest/' : `./allure-report/${run.buildNum || run.runNumber}/`,
-      passed: run.passed ?? 0,
-      total: run.total ?? 0,
-      failed: run.failed ?? 0,
-      date: formatDate(run.date)
-    }));
+    const entries = runsToShow.map((run, idx) => {
+      const isPipeErr = run.pipelineError === true || (run.total === 0 && run.failed > 0);
+      let targetUrl = idx === 0 ? './allure-report/latest/' : `./allure-report/${run.buildNum || run.runNumber}/`;
+      if (isPipeErr && run.runId) {
+        targetUrl = `https://github.com/Yuridiegotech/zombieplus/actions/runs/${run.runId}`;
+      }
+
+      return {
+        buildNum: run.buildNum || run.runNumber || '?',
+        runId: run.runId || null,
+        url: targetUrl,
+        passed: run.passed ?? 0,
+        total: run.total ?? 0,
+        failed: run.failed ?? 0,
+        pipelineError: isPipeErr,
+        date: formatDate(run.date)
+      };
+    });
 
     renderHistoryList(entries);
     return true;
