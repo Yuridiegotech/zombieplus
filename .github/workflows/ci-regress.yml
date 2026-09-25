@@ -46,10 +46,15 @@ jobs:
       # Playwright dependencies are now part of Dockerfile.tests
 
       - name: Bring up services (app + tests)
+        id: docker_up
         working-directory: app-repo
         run: |
           docker compose -f docker-compose.yml \
-                         -f docker-compose.ci.yml up --build --abort-on-container-exit
+                         -f docker-compose.ci.yml up --build --abort-on-container-exit || true
+          EXIT_CODE=$(docker inspect zombieplus-tests --format='{{.State.ExitCode}}' 2>/dev/null || echo 1)
+          echo "test_exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+          echo "$EXIT_CODE" > ../ci-test-exit-code.txt
+          exit $EXIT_CODE
 
       - name: Wait for test container exit
         run: |
@@ -159,6 +164,9 @@ jobs:
           CURRENT_TOTAL=0
           PIPELINE_ERROR="false"
 
+          # Detectar falha de infra via exit code salvo pelo step docker_up
+          CI_EXIT_CODE=$(cat ../ci-test-exit-code.txt 2>/dev/null || echo 1)
+
           SUMMARY_FILE=""
           for f in \
             "allure-report/widgets/summary.json" \
@@ -175,8 +183,14 @@ jobs:
             CURRENT_BROKEN=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('broken',0))" 2>/dev/null || echo 0)
             CURRENT_SKIPPED=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('skipped',0))" 2>/dev/null || echo 0)
             CURRENT_TOTAL=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('total',0))" 2>/dev/null || echo 0)
+
+            # Relatório vazio (0 testes) com exit code != 0 = falha de infra/pipeline
+            if [ "$CURRENT_TOTAL" = "0" ] && [ "$CI_EXIT_CODE" != "0" ]; then
+              PIPELINE_ERROR="true"
+              CURRENT_FAILED=1
+            fi
           else
-            # Caso não tenha gerado Allure Report: registrar falha de pipeline
+            # Nenhum relatório Allure gerado: registrar falha de pipeline
             PIPELINE_ERROR="true"
             CURRENT_FAILED=1
           fi

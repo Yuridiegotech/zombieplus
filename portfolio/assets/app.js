@@ -63,30 +63,57 @@ document.addEventListener('DOMContentLoaded', () => {
   // ──────────────────────────────────────────
   //  Render logic
   // ──────────────────────────────────────────
-  function updateLiveCard(passed, total, failed, isPipelineError) {
-    if (isPipelineError) {
-      const passEl = document.querySelector('.report-stat-item .val.pass');
-      if (passEl) passEl.textContent = `0 / 0`;
+  function updateLiveCard(passed, total, failed, isPipelineError, runId) {
+    const passEl = document.querySelector('.report-stat-item .val.pass');
+    const rateEl = document.querySelector('.report-stat-item .val.rate');
 
-      const rateEl = document.querySelector('.report-stat-item .val.rate');
+    if (isPipelineError) {
+      if (passEl) passEl.textContent = `— / —`;
+
       if (rateEl) {
-        rateEl.textContent = `0% (Falha)`;
+        rateEl.textContent = `Pipeline com Falha`;
         rateEl.style.color = 'var(--accent-red)';
+      }
+
+      // Inject a warning banner below the stats grid if not already present
+      if (!document.getElementById('pipeline-error-banner')) {
+        const statsGrid = document.querySelector('.report-stats-grid');
+        if (statsGrid) {
+          const banner = document.createElement('div');
+          banner.id = 'pipeline-error-banner';
+          banner.style.cssText = [
+            'display:flex', 'align-items:center', 'gap:10px',
+            'background:rgba(239,68,68,0.12)', 'border:1px solid rgba(239,68,68,0.35)',
+            'border-radius:10px', 'padding:10px 16px', 'margin-top:14px',
+            'font-size:13px', 'color:#fca5a5', 'line-height:1.4'
+          ].join(';');
+          const actionUrl = runId
+            ? `https://github.com/Yuridiegotech/zombieplus/actions/runs/${runId}`
+            : 'https://github.com/Yuridiegotech/zombieplus/actions';
+          banner.innerHTML = `
+            <i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;font-size:18px;flex-shrink:0"></i>
+            <span>Última execução terminou com <strong>falha de infraestrutura</strong> (nenhum teste coletado).
+            <a href="${actionUrl}" target="_blank"
+               style="color:#ef4444;text-decoration:underline;margin-left:4px;">Ver log no Actions →</a></span>
+          `;
+          statsGrid.after(banner);
+        }
       }
       return;
     }
 
+    // Remove banner if previous run had error and now it's fine
+    const prevBanner = document.getElementById('pipeline-error-banner');
+    if (prevBanner) prevBanner.remove();
+
     const rate = total > 0 ? Math.round((passed / total) * 100) : 0;
-
-    const passEl = document.querySelector('.report-stat-item .val.pass');
     if (passEl) passEl.textContent = `${passed} / ${total}`;
-
-    const rateEl = document.querySelector('.report-stat-item .val.rate');
     if (rateEl) {
       rateEl.textContent = `${rate}%`;
       rateEl.style.color = rate === 100 ? 'var(--primary)' : (rate >= 90 ? '#facc15' : 'var(--accent-red)');
     }
   }
+
 
   function renderHistoryList(runs) {
     const listEl = document.getElementById('historyRunsList');
@@ -147,8 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const latest = runsToShow[0];
 
     // Update live card
-    const isLatestPipelineError = latest.pipelineError === true || (latest.total === 0 && latest.failed > 0);
-    updateLiveCard(latest.passed ?? 0, latest.total ?? 0, latest.failed ?? 0, isLatestPipelineError);
+    const isLatestPipelineError = latest.pipelineError === true || (latest.total === 0 && latest.failed >= 0 && latest.pipelineError !== false);
+    const latestPipeErr = latest.pipelineError === true;
+    updateLiveCard(latest.passed ?? 0, latest.total ?? 0, latest.failed ?? 0, latestPipeErr, latest.runId ?? null);
 
     // Build run entries
     const entries = runsToShow.map((run, idx) => {
