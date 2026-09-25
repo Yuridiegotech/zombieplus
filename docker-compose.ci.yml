@@ -24,7 +24,10 @@ services:
       API_URL: http://localhost:3333
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
-      CI: "true"
+      # CI env var removida intencionalmente:
+      # o commit em BaseTest.java faz headless=true quando CI!=null,
+      # mas o BrowserFactory nao esta configurado para headless no Docker.
+      # O xvfb-run -a ja fornece display virtual para modo nao-headless.
     depends_on:
       - database
       - app
