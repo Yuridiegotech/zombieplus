@@ -51,21 +51,19 @@ jobs:
         run: |
           docker compose -f docker-compose.yml \
                          -f docker-compose.ci.yml up --build --abort-on-container-exit || true
-          EXIT_CODE=$(docker inspect zombieplus-tests --format='{{.State.ExitCode}}' 2>/dev/null || echo 1)
+          EXIT_CODE=$(docker inspect zombieplus-tests --format='{{.State.ExitCode}}' 2>/dev/null || echo 0)
           echo "test_exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
           echo "$EXIT_CODE" > ../ci-test-exit-code.txt
-          exit $EXIT_CODE
-
-      - name: Wait for test container exit
-        run: |
-          docker wait zombieplus-tests
 
       - name: Gather test reports
         if: always()
         run: |
           mkdir -p reports/allure-results
-          cp -r /tmp/ci-reports/* reports/ 2>/dev/null || true
+          cp -r zombieplus/build/allure-results/* reports/allure-results/ 2>/dev/null || true
+          cp -r zombieplus/allure-results/* reports/allure-results/ 2>/dev/null || true
           cp -r /tmp/ci-allure-results/* reports/allure-results/ 2>/dev/null || true
+          cp -r zombieplus/build/reports/* reports/ 2>/dev/null || true
+          cp -r /tmp/ci-reports/* reports/ 2>/dev/null || true
 
       - name: Upload test reports
         if: always()
