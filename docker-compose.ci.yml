@@ -23,6 +23,7 @@ services:
       BASE_URL: http://localhost:3000
       API_URL: http://localhost:3333
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
       CI: "true"
     depends_on:
       - database

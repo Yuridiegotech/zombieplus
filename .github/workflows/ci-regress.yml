@@ -49,28 +49,71 @@ jobs:
         id: docker_up
         working-directory: app-repo
         run: |
+          mkdir -p /tmp/ci-reports /tmp/ci-allure-results
+          chmod -R 777 /tmp/ci-reports /tmp/ci-allure-results 2>/dev/null || true
+
+          set +e
           docker compose -f docker-compose.yml \
-                         -f docker-compose.ci.yml up --build --abort-on-container-exit || true
-          EXIT_CODE=$(docker inspect zombieplus-tests --format='{{.State.ExitCode}}' 2>/dev/null || echo 0)
+                         -f docker-compose.ci.yml up --build --exit-code-from tests
+          EXIT_CODE=$?
+          set -e
+
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            INSPECT_CODE=$(docker inspect zombieplus-tests --format='{{.State.ExitCode}}' 2>/dev/null || echo "")
+            if [ -n "$INSPECT_CODE" ] && [ "$INSPECT_CODE" != "0" ]; then
+              EXIT_CODE=$INSPECT_CODE
+            fi
+          fi
+
           echo "test_exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
           echo "$EXIT_CODE" > ../ci-test-exit-code.txt
+          echo "=========================================="
+          echo "Tests exit code: $EXIT_CODE"
+          echo "=========================================="
 
-      - name: Gather test reports
+      - name: Gather test reports and container logs
         if: always()
         run: |
-          mkdir -p reports/allure-results
-          cp -r zombieplus/build/allure-results/* reports/allure-results/ 2>/dev/null || true
-          cp -r zombieplus/allure-results/* reports/allure-results/ 2>/dev/null || true
-          cp -r /tmp/ci-allure-results/* reports/allure-results/ 2>/dev/null || true
-          cp -r zombieplus/build/reports/* reports/ 2>/dev/null || true
-          cp -r /tmp/ci-reports/* reports/ 2>/dev/null || true
+          mkdir -p reports/allure-results reports/logs
+
+          # Salvar logs dos contêineres para auditoria e diagnóstico rápido
+          docker logs zombieplus-tests > reports/logs/tests.log 2>&1 || true
+          docker logs zombieplus-app > reports/logs/api.log 2>&1 || true
+          docker logs zombieplus-web > reports/logs/web.log 2>&1 || true
+          docker logs pgdb > reports/logs/db.log 2>&1 || true
+
+          # Garantir permissão de leitura nos volumes compartilhados
+          sudo chmod -R 777 zombieplus /tmp/ci-allure-results /tmp/ci-reports 2>/dev/null || true
+
+          # Copiar resultados Allure
+          if [ -d "/tmp/ci-allure-results" ] && [ "$(ls -A /tmp/ci-allure-results 2>/dev/null)" ]; then
+            cp -r /tmp/ci-allure-results/* reports/allure-results/ 2>/dev/null || true
+          fi
+          if [ -d "zombieplus/build/allure-results" ] && [ "$(ls -A zombieplus/build/allure-results 2>/dev/null)" ]; then
+            cp -r zombieplus/build/allure-results/* reports/allure-results/ 2>/dev/null || true
+          fi
+          if [ -d "zombieplus/allure-results" ] && [ "$(ls -A zombieplus/allure-results 2>/dev/null)" ]; then
+            cp -r zombieplus/allure-results/* reports/allure-results/ 2>/dev/null || true
+          fi
+
+          # Copiar relatórios do Gradle / Playwright
+          if [ -d "/tmp/ci-reports" ] && [ "$(ls -A /tmp/ci-reports 2>/dev/null)" ]; then
+            cp -r /tmp/ci-reports/* reports/ 2>/dev/null || true
+          fi
+          if [ -d "zombieplus/build/reports" ] && [ "$(ls -A zombieplus/build/reports 2>/dev/null)" ]; then
+            cp -r zombieplus/build/reports/* reports/ 2>/dev/null || true
+          fi
+          if [ -d "zombieplus/build/test-results" ] && [ "$(ls -A zombieplus/build/test-results 2>/dev/null)" ]; then
+            cp -r zombieplus/build/test-results reports/ 2>/dev/null || true
+          fi
 
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
-          path: reports/**
+          path: reports/
+          if-no-files-found: warn
 
       - name: Get Allure history from gh-pages
         uses: actions/checkout@v4
@@ -246,3 +289,13 @@ jobs:
             docker compose -f docker-compose.yml \
                            -f docker-compose.ci.yml down -v
           fi
+
+      - name: Fail workflow on regression or pipeline error
+        if: always()
+        run: |
+          CI_EXIT_CODE=$(cat ../ci-test-exit-code.txt 2>/dev/null || echo 1)
+          if [ "$CI_EXIT_CODE" != "0" ]; then
+            echo "::error::❌ Os testes de regressão falharam ou ocorreu um erro de execução no container (Exit Code: $CI_EXIT_CODE)."
+            exit $CI_EXIT_CODE
+          fi
+          echo "::notice::✅ Todos os testes de regressão foram executados e passaram com sucesso!"
