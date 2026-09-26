@@ -96,6 +96,13 @@ jobs:
             cp -r zombieplus/build/test-results reports/ 2>/dev/null || true
           fi
 
+          echo "========================================================"
+          echo "RESUMO DOS TESTES EXECUTADOS:"
+          if [ -d "zombieplus/build/test-results/test" ]; then
+            grep -rn "<failure" zombieplus/build/test-results/test/ || echo "Nenhum erro de asserção explícito nos XMLs."
+          fi
+          echo "========================================================"
+
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
