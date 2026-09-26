@@ -11,10 +11,7 @@ services:
     shm_size: '2gb'
     working_dir: /src/tests
     volumes:
-      - ./:/src
       - ../zombieplus:/src/tests
-      - /tmp/ci-reports:/src/tests/build/reports
-      - /tmp/ci-allure-results:/src/tests/build/allure-results
     environment:
       DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
       DATABASE_USER: postgres
@@ -25,6 +22,7 @@ services:
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
       CI: "true"
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=\"-Xmx2048m -XX:MaxMetaspaceSize=512m\""
     depends_on:
       - database
       - app
@@ -38,7 +36,7 @@ services:
              chmod +x /src/tests/gradlew &&
              until curl -s http://app:3333/health; do echo 'waiting for API...'; sleep 2; done &&
              until curl -s http://web:3000/ | grep -q 'Zombie+'; do echo 'waiting for UI...'; sleep 2; done &&
-             xvfb-run -a ./gradlew test --info; TEST_STATUS=$$?; ./gradlew allureReport --info || true; exit $$TEST_STATUS"
+             xvfb-run -a ./gradlew test --no-daemon --info --stacktrace; TEST_STATUS=$$?; ./gradlew allureReport --no-daemon --info || true; exit $$TEST_STATUS"
 
 networks:
   skynet:

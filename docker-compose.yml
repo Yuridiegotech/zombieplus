@@ -84,36 +84,7 @@ services:
     networks:
       - skynet
 
-  # -------------------------------------------------
-  # Serviço de Testes
-  # -------------------------------------------------
-  tests:
-    container_name: zombieplus-tests
-    image: gradle:8.10-jdk21
-    ipc: host
-    shm_size: '2gb'
-    working_dir: /src
-    volumes:
-      - ./api:/src
-      - ./tests:/src/tests
-      - /tmp/ci-reports:/src/tests/build/reports
-    environment:
-      DATABASE_URL: jdbc:postgresql://database:5432/zombieplus
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: pwd123
-      DB_DIALECT: postgres
-      FRONT_URL: http://localhost:3000
-      BASE_URL: http://localhost:3000
-      API_URL: http://localhost:3333
-      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
-    depends_on:
-      - database
-      - app
-      - web
-    networks:
-      - skynet
-    command: ./gradlew test
+
 
 networks:
   skynet:

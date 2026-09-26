@@ -33,24 +33,19 @@ jobs:
       - name: Prepare test suite folder
         run: |
           mkdir -p zombieplus
-          cp -r tests-repo/* zombieplus/
+          cp -a tests-repo/. zombieplus/
+          chmod +x zombieplus/gradlew
 
       - name: Install npm dependencies (API)
         run: |
           cd app-repo/api
           npm install --omit=dev
 
-      - name: Make Gradle wrapper executable
-        run: |
-          chmod +x zombieplus/gradlew
-      # Playwright dependencies are now part of Dockerfile.tests
-
       - name: Bring up services (app + tests)
         id: docker_up
         working-directory: app-repo
         run: |
-          mkdir -p /tmp/ci-reports /tmp/ci-allure-results
-          chmod -R 777 /tmp/ci-reports /tmp/ci-allure-results 2>/dev/null || true
+          sudo chmod -R 777 ../zombieplus 2>/dev/null || true
 
           set +e
           docker compose -f docker-compose.yml \
@@ -76,19 +71,16 @@ jobs:
         run: |
           mkdir -p reports/allure-results reports/logs
 
-          # Salvar logs dos contêineres para auditoria e diagnóstico rápido
+          # Salvar logs dos contêineres para diagnóstico rápido
           docker logs zombieplus-tests > reports/logs/tests.log 2>&1 || true
           docker logs zombieplus-app > reports/logs/api.log 2>&1 || true
           docker logs zombieplus-web > reports/logs/web.log 2>&1 || true
           docker logs pgdb > reports/logs/db.log 2>&1 || true
 
-          # Garantir permissão de leitura nos volumes compartilhados
-          sudo chmod -R 777 zombieplus /tmp/ci-allure-results /tmp/ci-reports 2>/dev/null || true
+          # Garantir permissão de leitura nos arquivos gerados pelo container
+          sudo chmod -R 777 zombieplus 2>/dev/null || true
 
           # Copiar resultados Allure
-          if [ -d "/tmp/ci-allure-results" ] && [ "$(ls -A /tmp/ci-allure-results 2>/dev/null)" ]; then
-            cp -r /tmp/ci-allure-results/* reports/allure-results/ 2>/dev/null || true
-          fi
           if [ -d "zombieplus/build/allure-results" ] && [ "$(ls -A zombieplus/build/allure-results 2>/dev/null)" ]; then
             cp -r zombieplus/build/allure-results/* reports/allure-results/ 2>/dev/null || true
           fi
@@ -96,10 +88,7 @@ jobs:
             cp -r zombieplus/allure-results/* reports/allure-results/ 2>/dev/null || true
           fi
 
-          # Copiar relatórios do Gradle / Playwright
-          if [ -d "/tmp/ci-reports" ] && [ "$(ls -A /tmp/ci-reports 2>/dev/null)" ]; then
-            cp -r /tmp/ci-reports/* reports/ 2>/dev/null || true
-          fi
+          # Copiar relatórios HTML/XML do Gradle / Playwright
           if [ -d "zombieplus/build/reports" ] && [ "$(ls -A zombieplus/build/reports 2>/dev/null)" ]; then
             cp -r zombieplus/build/reports/* reports/ 2>/dev/null || true
           fi
