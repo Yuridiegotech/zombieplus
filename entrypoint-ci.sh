@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+
+echo "=== Iniciando Socat Proxies ==="
+socat TCP-LISTEN:3333,fork,reuseaddr TCP:app:3333 &
+socat TCP-LISTEN:3000,fork,reuseaddr TCP:web:3000 &
+socat TCP-LISTEN:5432,fork,reuseaddr TCP:database:5432 &
+
+echo "=== Aguardando API (http://app:3333/health) ==="
+until curl -s http://app:3333/health; do
+  echo "Aguardando API..."
+  sleep 2
+done
+
+echo "=== Aguardando Frontend (http://web:3000/) ==="
+until curl -s http://web:3000/ | grep -q 'Zombie+'; do
+  echo "Aguardando UI..."
+  sleep 2
+done
+
+echo "=== Servicos prontos! Executando testes ==="
+chmod +x ./gradlew
+
+set +e
+xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew test --no-daemon --info --stacktrace
+TEST_STATUS=$?
+echo "=== Gradle test finalizado com status: $TEST_STATUS ==="
+
+echo "=== Gerando relatorio Allure ==="
+./gradlew allureReport --no-daemon --info || true
+
+echo "=== Finalizado com exit code: $TEST_STATUS ==="
+exit $TEST_STATUS

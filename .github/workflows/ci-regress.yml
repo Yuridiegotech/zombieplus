@@ -97,10 +97,13 @@ jobs:
           fi
 
           echo "========================================================"
-          echo "RESUMO DOS TESTES EXECUTADOS:"
+          echo "RESUMO DOS TESTES EXECUTADOS (XMLs):"
           if [ -d "zombieplus/build/test-results/test" ]; then
             grep -rn "<failure" zombieplus/build/test-results/test/ || echo "Nenhum erro de asserção explícito nos XMLs."
           fi
+          echo "========================================================"
+          echo "LOG COMPLETO DO CONTAINER DE TESTES:"
+          cat reports/logs/tests.log 2>/dev/null || echo "tests.log não disponível."
           echo "========================================================"
 
       - name: Upload test reports

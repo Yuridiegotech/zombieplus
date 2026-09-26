@@ -9,5 +9,10 @@ RUN apt-get update && apt-get install -y openjdk-21-jdk gradle curl socat xvfb &
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
+COPY entrypoint-ci.sh /usr/local/bin/entrypoint-ci.sh
+RUN chmod +x /usr/local/bin/entrypoint-ci.sh
+
 # Diretório de trabalho dentro do container
 WORKDIR /src/tests
+
+ENTRYPOINT ["/usr/local/bin/entrypoint-ci.sh"]
