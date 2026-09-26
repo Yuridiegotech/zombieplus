@@ -273,6 +273,20 @@ jobs:
           print(json.dumps(manifest, indent=2))
           " > gh-pages-deploy/allure-report/runs-manifest.json
 
+          # ── 6. Publicar Resumo Visual no Painel do GitHub Actions ──
+          echo "## 📊 Resumo da Execução de Testes Zombie+" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Métrica | Quantidade |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---:|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Total de Testes** | $CURRENT_TOTAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| ✅ **Passaram** | $CURRENT_PASSED |" >> $GITHUB_STEP_SUMMARY
+          echo "| ❌ **Falharam / Quebrados** | $((CURRENT_FAILED + CURRENT_BROKEN)) |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⏭️ **Ignorados** | $CURRENT_SKIPPED |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links dos Relatórios:" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 **[Allure Report Interativo da Execução #$RUN_NUM](https://yuridiegotech.github.io/zombieplus/allure-report/latest/)**" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 **[Portal Showcase QA Zombie+](https://yuridiegotech.github.io/zombieplus/)**" >> $GITHUB_STEP_SUMMARY
+
       - name: Deploy report to GitHub Pages
         if: always() && hashFiles('gh-pages-deploy/index.html') != ''
         uses: peaceiris/actions-gh-pages@v3
