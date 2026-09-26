@@ -18,6 +18,9 @@ until curl -s http://web:3000/ | grep -q 'Zombie+'; do
   sleep 2
 done
 
+echo "=== Limpando UTF-8 BOM de arquivos Java ==="
+find . -name "*.java" -exec sed -i '1s/^\xEF\xBB\xBF//' {} + 2>/dev/null || true
+
 echo "=== Servicos prontos! Executando testes ==="
 chmod +x ./gradlew
 
