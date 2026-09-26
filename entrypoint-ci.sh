@@ -21,16 +21,24 @@ done
 echo "=== Limpando UTF-8 BOM de arquivos Java ==="
 find . -name "*.java" -exec sed -i '1s/^\xEF\xBB\xBF//' {} + 2>/dev/null || true
 
+echo "=== Iniciando Xvfb Virtual Display (1920x1080x24) ==="
+export DISPLAY=:99
+Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset &
+XVFB_PID=$!
+sleep 1
+
 echo "=== Servicos prontos! Executando testes ==="
 chmod +x ./gradlew
 
 set +e
-xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew test --no-daemon --info --stacktrace
+./gradlew test --no-daemon --info --stacktrace
 TEST_STATUS=$?
 echo "=== Gradle test finalizado com status: $TEST_STATUS ==="
 
 echo "=== Gerando relatorio Allure ==="
 ./gradlew allureReport --no-daemon --info || true
+
+kill $XVFB_PID 2>/dev/null || true
 
 echo "=== Finalizado com exit code: $TEST_STATUS ==="
 exit $TEST_STATUS

@@ -307,9 +307,33 @@ jobs:
       - name: Fail workflow on regression or pipeline error
         if: always()
         run: |
+          SUMMARY_FILE=""
+          for f in "allure-report/widgets/summary.json" "gh-pages-deploy/allure-report/latest/widgets/summary.json"; do
+            if [ -f "$f" ]; then
+              SUMMARY_FILE="$f"
+              break
+            fi
+          done
+
+          if [ -n "$SUMMARY_FILE" ]; then
+            PASSED=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('passed',0))" 2>/dev/null || echo 0)
+            FAILED=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('failed',0))" 2>/dev/null || echo 0)
+            BROKEN=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('broken',0))" 2>/dev/null || echo 0)
+            TOTAL=$(python3 -c "import json; d=json.load(open('$SUMMARY_FILE')); s=d.get('statistic',{}); print(s.get('total',0))" 2>/dev/null || echo 0)
+
+            if [ "$TOTAL" -gt 0 ] && [ "$FAILED" -eq 0 ] && [ "$BROKEN" -eq 0 ]; then
+              echo "::notice::✅ Todos os $TOTAL testes de regressão passaram com 100% de sucesso!"
+              exit 0
+            elif [ "$FAILED" -gt 0 ] || [ "$BROKEN" -gt 0 ]; then
+              echo "::error::❌ Houve quebra de regressão: $FAILED teste(s) falharam e $BROKEN teste(s) quebraram de um total de $TOTAL testes."
+              exit 1
+            fi
+          fi
+
           CI_EXIT_CODE=$(cat ../ci-test-exit-code.txt 2>/dev/null || echo 1)
           if [ "$CI_EXIT_CODE" != "0" ]; then
-            echo "::error::❌ Os testes de regressão falharam ou ocorreu um erro de execução no container (Exit Code: $CI_EXIT_CODE)."
+            echo "::error::❌ Erro na execução da pipeline ou contêiner de testes (Exit Code: $CI_EXIT_CODE)."
             exit $CI_EXIT_CODE
           fi
-          echo "::notice::✅ Todos os testes de regressão foram executados e passaram com sucesso!"
+
+          echo "::notice::✅ Pipeline finalizada com sucesso!"
