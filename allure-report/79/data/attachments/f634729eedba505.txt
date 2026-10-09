@@ -1,0 +1,1 @@
+DELETE FROM tvshows WHERE title = 'The Walking Dead'
