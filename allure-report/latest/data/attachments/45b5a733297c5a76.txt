@@ -1,0 +1,1 @@
+DELETE FROM tvshows WHERE title = 'Santa Clarita Zombie'
